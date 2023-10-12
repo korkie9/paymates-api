@@ -9,13 +9,14 @@ namespace paymatesapi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
         private static UserDto user = new UserDto
         {
             Email = "justin@korkie.cm",
             Password = "123"
         };
-        [HttpGet]
-        public async Task<ActionResult<UserDto>> GetAuth()
+        [HttpPost("user")]
+        public async Task<ActionResult<UserDto>> Register(User request)
         {
 
             return Ok(user);

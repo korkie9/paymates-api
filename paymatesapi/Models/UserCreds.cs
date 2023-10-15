@@ -2,7 +2,7 @@
 
 namespace paymatesapi.Models
 {
-    public class UserDto
+    public class UserCreds
     {
         public required string Email { get; set; }
         public required string Password { get; set; }

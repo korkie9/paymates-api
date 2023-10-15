@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using paymatesapi.Models;
+using paymatesapi.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace paymatesapi.Controllers
@@ -9,17 +10,19 @@ namespace paymatesapi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-        private static UserDto user = new UserDto
+        // private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
+        public AuthController(IConfiguration configuration, IUserService userService)
         {
-            Email = "justin@korkie.cm",
-            Password = "123"
-        };
-        [HttpPost("user")]
-        public async Task<ActionResult<UserDto>> Register(User request)
-        {
+            _userService = userService;
+        }
 
-            return Ok(user);
+        [HttpPost("register")]
+        public async Task<ActionResult<AuthenticationResponse>> Register(User request)
+        {
+            var response = await _userService.registerUser(request);
+            if (response == null) return BadRequest(new { message = "Username or password is incorrect" });
+            return Ok(response);
         }
     }
 }

@@ -26,12 +26,12 @@ namespace paymatesapi.Services
         }
         public async Task<AuthenticationResponse> registerUser(User user)
         {
-            var dbUser = _userContext.User.GetType();
+            var dbUser = _userContext.User.Any(u => u.Username == user.Username || u.Email == user.Email);
+            if(dbUser == true) return null;
+            _userContext.Add(user);
             await _userContext.SaveChangesAsync();
 
-            System.Console.WriteLine(dbUser.Name);
-
-            return new AuthenticationResponse(dummyUser, "token");
+            return new AuthenticationResponse(user, "token");
         }
         public AuthenticationResponse loginUser(UserCreds user)
         {

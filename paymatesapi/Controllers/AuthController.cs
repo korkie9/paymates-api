@@ -21,7 +21,7 @@ namespace paymatesapi.Controllers
         public async Task<ActionResult<AuthenticationResponse>> Register(User request)
         {
             var response = await _userService.registerUser(request);
-            if (response == null) return BadRequest(new { message = "Username or password is incorrect" });
+            if (response == null) return BadRequest(new { message = "Username or Email already exists" });
             return Ok(response);
         }
     }

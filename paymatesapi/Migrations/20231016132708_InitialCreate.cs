@@ -14,7 +14,7 @@ namespace paymatesapi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "Users",
                 columns: table => new
                 {
                     Uid = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -34,7 +34,7 @@ namespace paymatesapi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Uid);
+                    table.PrimaryKey("PK_Users", x => x.Uid);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
@@ -43,7 +43,7 @@ namespace paymatesapi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "User");
+                name: "Users");
         }
     }
 }

@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using paymatesapi.Contexts;
 using Microsoft.EntityFrameworkCore;
 using paymatesapi.Services;
-
+using paymatesapi.Helpers;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,12 +18,32 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAuthentication().AddJwtBearer();
-
 builder.Services.AddAuthorization();
 
 //DI app services
+builder.Services.AddScoped<IJwtUtils, JwtUtils>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+
+builder.Services.AddAuthentication(
+    // x =>
+    // {
+    //     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    //     x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+
+    // }
+
+).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration.GetSection("Jwt:Token").Value!))
+    };
+});
 
 var app = builder.Build();
 
@@ -32,7 +55,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

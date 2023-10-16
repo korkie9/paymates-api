@@ -10,7 +10,7 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(UserContext))]
-    [Migration("20231015175116_InitialCreate")]
+    [Migration("20231016132708_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -54,7 +54,7 @@ namespace paymatesapi.Migrations
 
                     b.HasKey("Uid");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

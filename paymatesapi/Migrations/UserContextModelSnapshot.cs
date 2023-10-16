@@ -51,7 +51,7 @@ namespace paymatesapi.Migrations
 
                     b.HasKey("Uid");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

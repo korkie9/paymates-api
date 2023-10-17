@@ -26,10 +26,21 @@ namespace paymatesapi.Controllers
             return Ok(response);
         }
 
+        [HttpPost("login")]
+        // public Task<ActionResult<AuthenticationResponse>> Login(UserCreds creds)
+        public ActionResult Login(UserCreds creds)
+
+        {
+            var response = _userService.loginUser(creds);
+            if (response == null) return BadRequest(new { message = "Username or Password is incorrect" });
+            // return Ok(response);
+            return Ok();
+        }
+
         [HttpGet("test"), Authorize]
         public ActionResult<string> Test()
         {
             return Ok("hello world");
-        } 
+        }
     }
 }

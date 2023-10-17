@@ -1,6 +1,7 @@
 ﻿using paymatesapi.Models;
 using paymatesapi.Contexts;
 using paymatesapi.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace paymatesapi.Services
@@ -51,13 +52,15 @@ namespace paymatesapi.Services
 
             return new AuthenticationResponse(newUser, token);
         }
-        public AuthenticationResponse loginUser(UserCreds user)
+        public AuthenticationResponse loginUser(UserCreds creds)
         {
-            // if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            // {
-            //     return BadRequest("Wrong password.");
-            // }
-            return new AuthenticationResponse(dummyUser, "token");
+            // var dbUser = _userContext.Users.Any(u => u.Username == creds.Username || u.Email == creds.Username);
+            // if (dbUser == null) return null;
+            // if (!BCrypt.Net.BCrypt.Verify(creds.Password, dbUser.Password)) return null;
+
+            // var token = _jwtUitls.GenerateJwtToken(dbUser);
+            // return new AuthenticationResponse(dbUser, token);
+            return null;
         }
         public bool deleteUser(string id)
         {

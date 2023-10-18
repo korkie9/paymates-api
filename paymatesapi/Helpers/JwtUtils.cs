@@ -37,7 +37,7 @@ namespace paymatesapi.Helpers
                 new Claim("Name", user.Name),
                 new Claim("Surname", user.Surname),
                 new Claim("Email", user.Email),
-                new Claim("PhotoUrl", user.PhotoUrl),
+                new Claim("PhotoUrl", user.PhotoUrl ?? ""),
             }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

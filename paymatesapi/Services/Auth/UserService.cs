@@ -34,7 +34,8 @@ namespace paymatesapi.Services
         public async Task<AuthenticationResponse> registerUser(UserDTO user)
         {
             var dbUser = _dataContext.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
-            if (dbUser == true) return null;
+            //TODO: Test this
+            if (dbUser == true) return new AuthenticationResponse(null, null);
             Guid guid = Guid.NewGuid();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
 

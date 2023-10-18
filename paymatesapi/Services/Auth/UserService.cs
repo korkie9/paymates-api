@@ -1,18 +1,20 @@
-﻿using paymatesapi.Models;
+﻿using paymatesapi.DTOs;
 using paymatesapi.Contexts;
 using paymatesapi.Helpers;
 using Microsoft.EntityFrameworkCore;
+using paymatesapi.Entities;
+using paymatesapi.Models;
 
 
 namespace paymatesapi.Services
 {
     public class UserService : IUserService
     {
-        private readonly UserContext _userContext;
+        private readonly DataContext _dataContext;
         private readonly IJwtUtils _jwtUitls;
-        public UserService(UserContext userContext, IJwtUtils jwtUtils)
+        public UserService(DataContext dataContext, IJwtUtils jwtUtils)
         {
-            _userContext = userContext;
+            _dataContext = dataContext;
             _jwtUitls = jwtUtils;
         }
         private static User dummyUser = new User
@@ -29,9 +31,9 @@ namespace paymatesapi.Services
         {
             return new AuthenticationResponse(dummyUser, "token");
         }
-        public async Task<AuthenticationResponse> registerUser(UserModel user)
+        public async Task<AuthenticationResponse> registerUser(UserDTO user)
         {
-            var dbUser = _userContext.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
+            var dbUser = _dataContext.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
             if (dbUser == true) return null;
             Guid guid = Guid.NewGuid();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
@@ -46,27 +48,26 @@ namespace paymatesapi.Services
                 PhotoUrl = user.PhotoUrl ?? null,
                 Password = passwordHash,
             };
-            _userContext.Add(newUser);
-            await _userContext.SaveChangesAsync();
+            _dataContext.Add(newUser);
+            await _dataContext.SaveChangesAsync();
             var token = _jwtUitls.GenerateJwtToken(newUser);
 
             return new AuthenticationResponse(newUser, token);
         }
         public AuthenticationResponse loginUser(UserCreds creds)
         {
-            // var dbUser = _userContext.Users.Any(u => u.Username == creds.Username || u.Email == creds.Username);
-            // if (dbUser == null) return null;
-            // if (!BCrypt.Net.BCrypt.Verify(creds.Password, dbUser.Password)) return null;
+            var dbUser = _dataContext.Users.Where(u => u.Username == creds.Username || u.Email == creds.Username).FirstOrDefault();
+            if (dbUser == null) return new AuthenticationResponse(null, null);
+            if (!BCrypt.Net.BCrypt.Verify(creds.Password, dbUser.Password)) return new AuthenticationResponse(null, null);
 
-            // var token = _jwtUitls.GenerateJwtToken(dbUser);
-            // return new AuthenticationResponse(dbUser, token);
-            return null;
+            var token = _jwtUitls.GenerateJwtToken(dbUser);
+            return new AuthenticationResponse(dbUser, token);
         }
         public bool deleteUser(string id)
         {
             return true;
         }
-        public AuthenticationResponse updateUser(User user)
+        public AuthenticationResponse updateUser(UserDTO user)
         {
             return new AuthenticationResponse(dummyUser, "token");
         }

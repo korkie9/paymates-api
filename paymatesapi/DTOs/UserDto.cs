@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace paymatesapi.Models
+namespace paymatesapi.DTOs
 {
-    public class UserModel
+    public class UserDTO
     {
 
         public string? Uid { get; set; }

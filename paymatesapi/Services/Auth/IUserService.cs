@@ -1,14 +1,14 @@
-﻿using paymatesapi.Models;
-
+﻿using paymatesapi.DTOs;
+using paymatesapi.Models;
 namespace paymatesapi.Services
 {
     public interface IUserService
     {
         AuthenticationResponse getUser(string id);
-        Task<AuthenticationResponse> registerUser(UserModel user);
+        Task<AuthenticationResponse> registerUser(UserDTO user);
         AuthenticationResponse loginUser(UserCreds user);
         bool deleteUser(string id);
-        AuthenticationResponse updateUser(User user);
+        AuthenticationResponse updateUser(UserDTO user);
 
 
 

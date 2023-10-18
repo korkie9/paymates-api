@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using paymatesapi.Models;
+using paymatesapi.DTOs;
 using paymatesapi.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
@@ -11,15 +12,14 @@ namespace paymatesapi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        // private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
-        public AuthController(IConfiguration configuration, IUserService userService)
+        public AuthController(IUserService userService)
         {
             _userService = userService;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthenticationResponse>> Register(UserModel request)
+        public async Task<ActionResult<AuthenticationResponse>> Register(UserDTO request)
         {
             var response = await _userService.registerUser(request);
             if (response == null) return BadRequest(new { message = "Username or Email already exists" });
@@ -27,14 +27,12 @@ namespace paymatesapi.Controllers
         }
 
         [HttpPost("login")]
-        // public Task<ActionResult<AuthenticationResponse>> Login(UserCreds creds)
         public ActionResult Login(UserCreds creds)
-
         {
+            //TODO: test this
             var response = _userService.loginUser(creds);
             if (response == null) return BadRequest(new { message = "Username or Password is incorrect" });
-            // return Ok(response);
-            return Ok();
+            return Ok(response);
         }
 
         [HttpGet("test"), Authorize]

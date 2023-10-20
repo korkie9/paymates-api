@@ -23,5 +23,10 @@ namespace paymatesapi.Entities
 
         public required string Password { get; set; }
 
+        public required string RefreshToken { get; set; }
+
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")] 
+        public required DateTime RefreshTokenExpiry { get; set; }
+
     }
 }

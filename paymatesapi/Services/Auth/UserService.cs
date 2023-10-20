@@ -4,7 +4,8 @@ using paymatesapi.Helpers;
 using Microsoft.EntityFrameworkCore;
 using paymatesapi.Entities;
 using paymatesapi.Models;
-
+using System.Security.Cryptography;
+using System;
 
 namespace paymatesapi.Services
 {
@@ -24,21 +25,23 @@ namespace paymatesapi.Services
             Surname = "korkie",
             Username = "korkews",
             Email = "werfrw@sewrf.com",
-            Password = "erfwefwf"
-
+            Password = "erfwefwf",
+            RefreshToken = "dfbedrtrdfgb",
+            RefreshTokenExpiry = DateTime.Now.AddHours(1)
         };
         public AuthenticationResponse getUser(string id)
         {
-            return new AuthenticationResponse(dummyUser, "token");
+            var dbUser = _dataContext.Users.Find(id);
+            return new AuthenticationResponse(dbUser);
         }
-        public async Task<AuthenticationResponse> registerUser(UserDTO user)
+        public async Task<AuthenticationResponse> registerUser(UserDTO user) //add refresh token instead of access token
         {
             var dbUser = _dataContext.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
             //TODO: Test this
-            if (dbUser == true) return new AuthenticationResponse(null, null);
+            if (dbUser == true) return new AuthenticationResponse(null);
             Guid guid = Guid.NewGuid();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
-
+            string newRefreshToken = _jwtUitls.GenerateRefreshToken();
             User newUser = new User
             {
                 Uid = guid.ToString(),
@@ -48,21 +51,25 @@ namespace paymatesapi.Services
                 Email = user.Email,
                 PhotoUrl = user.PhotoUrl ?? null,
                 Password = passwordHash,
+                RefreshToken = newRefreshToken,
+                RefreshTokenExpiry = DateTime.Now.AddHours(1)
             };
             _dataContext.Add(newUser);
             await _dataContext.SaveChangesAsync();
-            var token = _jwtUitls.GenerateJwtToken(newUser);
 
-            return new AuthenticationResponse(newUser, token);
+            return new AuthenticationResponse(newUser);
         }
-        public AuthenticationResponse loginUser(UserCreds creds)
+        public async Task<AuthenticationResponse>  loginUser(UserCreds creds) //add refresh token instead of access token
         {
             var dbUser = _dataContext.Users.Where(u => u.Username == creds.Username || u.Email == creds.Username).FirstOrDefault();
-            if (dbUser == null) return new AuthenticationResponse(null, null);
-            if (!BCrypt.Net.BCrypt.Verify(creds.Password, dbUser.Password)) return new AuthenticationResponse(null, null);
+            if (dbUser == null) return new AuthenticationResponse(null);
+            if (!BCrypt.Net.BCrypt.Verify(creds.Password, dbUser.Password)) return new AuthenticationResponse(null);
 
-            var token = _jwtUitls.GenerateJwtToken(dbUser);
-            return new AuthenticationResponse(dbUser, token);
+            var refreshToken = _jwtUitls.GenerateRefreshToken();
+            dbUser.RefreshToken = refreshToken;
+            dbUser.RefreshTokenExpiry = DateTime.Now.AddHours(1);
+            await _dataContext.SaveChangesAsync();
+            return new AuthenticationResponse(dbUser);
         }
         public bool deleteUser(string id)
         {
@@ -70,7 +77,7 @@ namespace paymatesapi.Services
         }
         public AuthenticationResponse updateUser(UserDTO user)
         {
-            return new AuthenticationResponse(dummyUser, "token");
+            return new AuthenticationResponse(dummyUser);
         }
 
     }

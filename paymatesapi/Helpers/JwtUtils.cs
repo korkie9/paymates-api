@@ -4,13 +4,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using paymatesapi.Entities;
-
+using System.Security.Cryptography;
 
 namespace paymatesapi.Helpers
 {
     public interface IJwtUtils
     {
         public string GenerateJwtToken(User user);
+        public string GenerateRefreshToken();
         // public int? ValidateJwtToken(string? token);
     }
 
@@ -39,11 +40,19 @@ namespace paymatesapi.Helpers
                 new Claim("Email", user.Email),
                 new Claim("PhotoUrl", user.PhotoUrl ?? ""),
             }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddMinutes(5),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
 
         // public int? ValidateJwtToken(string? token)

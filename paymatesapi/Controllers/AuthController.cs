@@ -47,8 +47,8 @@ namespace paymatesapi.Controllers
         [HttpGet("refresh-token")]
         public ActionResult<string> RefreshToken(User user)
         {
-            AuthenticationResponse response = _userService.getUser(user.Uid);
-            if(response == null) return BadRequest("User does not exist");
+            AuthenticationResponse response = _userService.getUser(user.Uid, user.Email, user.Username);
+            if(response.Uid == null) return BadRequest("User does not exist");
             if (response.RefreshToken == null) return BadRequest("Invalid Refresh token");
             if (!response.RefreshToken.Equals(user.RefreshToken))
             {

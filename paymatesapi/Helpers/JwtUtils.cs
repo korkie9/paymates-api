@@ -5,12 +5,13 @@ using System.Security.Claims;
 using System.Text;
 using paymatesapi.Entities;
 using System.Security.Cryptography;
+using paymatesapi.Models;
 
 namespace paymatesapi.Helpers
 {
     public interface IJwtUtils
     {
-        public string GenerateJwtToken(User user);
+        public string GenerateJwtToken(AuthenticationResponse user);
         public string GenerateRefreshToken();
         // public int? ValidateJwtToken(string? token);
     }
@@ -25,9 +26,17 @@ namespace paymatesapi.Helpers
             _configuration = configuration;
         }
 
-        public string GenerateJwtToken(User user)
+        public string GenerateJwtToken(AuthenticationResponse user)
         {
-            // generate token that is valid for 7 days
+            if(user == null) return "error";
+            if (user?.Uid == null) return "error";
+            if (user?.Name == null) return "error";
+            if (user?.Surname == null) return "error";
+            if (user?.Username == null) return "error";
+            if (user?.Email == null) return "error";
+            if (user?.Uid == null) return "error";
+
+            // generate token that is valid for 5 minutes
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt:Token").Value!);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -37,6 +46,7 @@ namespace paymatesapi.Helpers
                 new Claim("Uid", user.Uid),
                 new Claim("Name", user.Name),
                 new Claim("Surname", user.Surname),
+                new Claim("Username", user.Username),
                 new Claim("Email", user.Email),
                 new Claim("PhotoUrl", user.PhotoUrl ?? ""),
             }),

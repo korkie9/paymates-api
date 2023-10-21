@@ -29,9 +29,9 @@ namespace paymatesapi.Services
             RefreshToken = "dfbedrtrdfgb",
             RefreshTokenExpiry = DateTime.Now.AddHours(1)
         };
-        public AuthenticationResponse getUser(string id, string email, string username)
+        public AuthenticationResponse getUser(string id)
         {
-            var dbUser = _dataContext.Users.Find(id, email, username);
+            var dbUser = _dataContext.Users.Find(id);
             return new AuthenticationResponse(dbUser);
         }
         public async Task<AuthenticationResponse> registerUser(UserDTO user) //add refresh token instead of access token

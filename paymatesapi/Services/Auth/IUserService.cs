@@ -6,7 +6,7 @@ namespace paymatesapi.Services
 {
     public interface IUserService
     {
-        AuthenticationResponse getUser(string id, string email, string username);
+        AuthenticationResponse getUser(string id);
         Task<AuthenticationResponse> registerUser(UserDTO user);
         Task<AuthenticationResponse> loginUser(UserCreds user);
         bool deleteUser(string id);

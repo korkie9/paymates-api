@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace paymatesapi.Entities
 {
-    [PrimaryKey(nameof(Uid), nameof(Email), nameof(Username))]
     public class User
     {
+        [Key]
         public required string Uid { get; set; }
 
         [EmailAddress(ErrorMessage = "Valid Email is required")]

@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace paymatesapi.Entities
 {
-    [PrimaryKey(nameof(Uid), nameof(FriendUid))]
+    [PrimaryKey(nameof(FriendOneUid), nameof(FriendTwoUid))]
     public class Friend
     {
-        public required string Uid { get; set; }
+        public required string FriendOneUid { get; set; }
 
-        public required string FriendUid { get; set; }
+        public required string FriendTwoUid { get; set; }
     }
 }

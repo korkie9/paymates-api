@@ -28,7 +28,12 @@ namespace paymatesapi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(70)
+                        .HasColumnType("varchar(70)");
+
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(70)
                         .HasColumnType("varchar(70)");
@@ -46,11 +51,6 @@ namespace paymatesapi.Migrations
 
                     b.Property<DateTime>("RefreshTokenExpiry")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasMaxLength(70)
-                        .HasColumnType("varchar(70)");
 
                     b.Property<string>("Username")
                         .IsRequired()

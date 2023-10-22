@@ -16,10 +16,10 @@ namespace paymatesapi.Entities
         public required string Username { get; set; }
 
         [StringLength(70)]
-        public required string Name { get; set; }
+        public required string FirstName { get; set; }
 
         [StringLength(70)]
-        public required string Surname { get; set; }
+        public required string LastName { get; set; }
 
         public required string Password { get; set; }
 

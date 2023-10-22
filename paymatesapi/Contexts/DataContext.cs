@@ -8,5 +8,7 @@ namespace paymatesapi.Contexts
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+
+        public DbSet<Friend> Friends { get; set; }
     }
 }

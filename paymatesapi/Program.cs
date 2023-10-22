@@ -24,6 +24,7 @@ builder.Services.AddAuthorization();
 //DI app services
 builder.Services.AddScoped<IJwtUtils, JwtUtils>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFriendService, FriendService>();
 
 
 builder.Services.AddAuthentication(

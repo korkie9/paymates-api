@@ -30,8 +30,8 @@ namespace paymatesapi.Helpers
         {
             if(user == null) return "error";
             if (user?.Uid == null) return "error";
-            if (user?.Name == null) return "error";
-            if (user?.Surname == null) return "error";
+            if (user?.FirstName == null) return "error";
+            if (user?.LastName == null) return "error";
             if (user?.Username == null) return "error";
             if (user?.Email == null) return "error";
             if (user?.Uid == null) return "error";
@@ -44,8 +44,8 @@ namespace paymatesapi.Helpers
                 Subject = new ClaimsIdentity(new[]
                 {
                 new Claim("Uid", user.Uid),
-                new Claim("Name", user.Name),
-                new Claim("Surname", user.Surname),
+                new Claim("Name", user.FirstName),
+                new Claim("Surname", user.LastName),
                 new Claim("Username", user.Username),
                 new Claim("Email", user.Email),
                 new Claim("PhotoUrl", user.PhotoUrl ?? ""),

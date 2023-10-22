@@ -7,8 +7,8 @@ using paymatesapi.Models;
 public class AuthenticationResponse
 {
     public string? Uid { get; set; }
-    public string? Name { get; set; }
-    public string? Surname { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public string? Username { get; set; }
     public string? Email { get; set; }
     public string? PhotoUrl { get; set; }
@@ -19,8 +19,8 @@ public class AuthenticationResponse
     public AuthenticationResponse(User? user)
     {
         Uid = user?.Uid;
-        Name = user?.Name;
-        Surname = user?.Surname;
+        FirstName = user?.FirstName;
+        LastName = user?.LastName;
         Username = user?.Username;
         Email = user?.Email;
         PhotoUrl = user?.PhotoUrl;

@@ -21,8 +21,8 @@ namespace paymatesapi.Services
         private static User dummyUser = new User
         {
             Uid = "ewrferf",
-            Name = "randow",
-            Surname = "korkie",
+            FirstName = "randow",
+            LastName = "korkie",
             Username = "korkews",
             Email = "werfrw@sewrf.com",
             Password = "erfwefwf",
@@ -45,8 +45,8 @@ namespace paymatesapi.Services
             User newUser = new User
             {
                 Uid = guid.ToString(),
-                Name = user.Name,
-                Surname = user.Surname,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Username = user.Username,
                 Email = user.Email,
                 PhotoUrl = user.PhotoUrl ?? null,

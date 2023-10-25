@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using paymatesapi.Services;
 using System.IdentityModel.Tokens.Jwt;
-
+using System.Security.Claims;
+using paymatesapi.Helpers;
 
 
 namespace paymatesapi.Controllers
@@ -15,49 +16,65 @@ namespace paymatesapi.Controllers
     public class FriendsController : ControllerBase
     {
         private readonly IFriendService _friendService;
-        public FriendsController(IFriendService friendService)
+        private readonly IJwtUtils _jwtUtils;
+
+        public FriendsController(IFriendService friendService, IJwtUtils jwtUtils)
         {
+            _jwtUtils = jwtUtils;
             _friendService = friendService;
         }
 
         [HttpPost("add-friend"), Authorize]
         public async Task<ActionResult<string>> AddFriend(FriendDTO request)
         {
-            if (Request.Headers.TryGetValue("Authorization", out var authHeaderValues))
-            {
-                string authHeaderValue = authHeaderValues.FirstOrDefault();
+            var userId = GetUidFromHeaders();
+            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
 
-                if (!string.IsNullOrEmpty(authHeaderValue) && authHeaderValue.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                {
-                    string token = authHeaderValue.Substring("Bearer ".Length);
-
-                    var tokenHandler = new JwtSecurityTokenHandler();
-
-                    var securityToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
-
-                    if (securityToken == null) return BadRequest(new { message = "User is not authorized" });
-                    var claims = securityToken.Claims;
-                    var userId = claims.FirstOrDefault(c => c.Type == "Uid")?.Value;
-                    string user = await _friendService.addFriend(userId, request.FriendUid);
-                    if (user == null) return BadRequest(new { message = "Users are already friends" });
-                    if (user == "User not found") return BadRequest(new { message = user });
-                    return Ok(user);
-                }
-            }
-            return StatusCode(500);
+            string user = await _friendService.addFriend(userId, request.FriendUid);
+            if (user == "Users are already friends") return BadRequest(new { message = user });
+            if (user == "User not found") return BadRequest(new { message = user });
+            return Ok(user); //TODO: return okay responses with object containing message for uniformity across project
         }
 
-        [HttpPost("remove-friend"), Authorize]
-        public ActionResult<string> RemoveFriend(FriendDTO creds)
+        [HttpDelete("remove-friend"), Authorize]
+        public async Task<ActionResult<string>> RemoveFriend(FriendDTO creds)
         {
-            string user = _friendService.deleteFriend("friend");
-            return Ok(user);
+            //TODO: Once transactions are created, this controller must be updated to delete ascociated transactions
+            var userId = GetUidFromHeaders();
+            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
+
+            var userIsDeleted = await _friendService.deleteFriend(userId, creds.FriendUid);
+            if (userIsDeleted) return Ok("Friend was removed");
+            return BadRequest("An error occured. Friend could not be deleted.");
         }
 
+        [HttpGet("get-friends"), Authorize]
+        public ActionResult<string> GetFriends()
+        {
+            var userId = GetUidFromHeaders();
+            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
+
+            return Ok("Hello");
+        }
         [HttpGet("test"), Authorize]
         public ActionResult<string> Test()
         {
             return Ok("hello world");
+        }
+
+        private string GetUidFromHeaders()
+        {
+            List<Claim> claims = _jwtUtils.GetClaimsFromHeaderToken();
+
+            if (claims.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var userId = claims.FirstOrDefault(c => c.Type == "Uid")?.Value;
+            if (String.IsNullOrEmpty(userId)) return string.Empty;
+            return userId;
+
         }
     }
 }

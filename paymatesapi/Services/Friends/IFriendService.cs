@@ -7,7 +7,8 @@ namespace paymatesapi.Services
     public interface IFriendService
     {
         Task<string> addFriend(string userUid, string friendUid);
-        string deleteFriend(string uid);
+        Task<bool> deleteFriend(string userUid, string friendUid);
+
 
     }
 }

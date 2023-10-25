@@ -25,15 +25,17 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtUtils, JwtUtils>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
 builder.Services.AddAuthentication(
-    // x =>
-    // {
-    //     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    //     x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+// x =>
+// {
+//     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//     x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 
-    // }
+// }
 
 ).AddJwtBearer(options =>
 {

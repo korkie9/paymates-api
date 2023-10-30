@@ -23,8 +23,9 @@ builder.Services.AddAuthorization();
 
 //DI app services
 builder.Services.AddScoped<IJwtUtils, JwtUtils>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserAuthService, UserAuthService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

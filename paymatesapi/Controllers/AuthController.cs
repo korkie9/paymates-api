@@ -14,19 +14,19 @@ namespace paymatesapi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IUserAuthService _userAuthService;
         private readonly IJwtUtils _jwtUtils;
 
-        public AuthController(IUserService userService, IJwtUtils jwtUtils)
+        public AuthController(IUserAuthService userAuthService, IJwtUtils jwtUtils)
         {
             _jwtUtils = jwtUtils;
-            _userService = userService;
+            _userAuthService = userAuthService;
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<AuthenticationResponse>> Register(UserDTO request)
         {
-            var response = await _userService.registerUser(request); //returns null if user exists
+            var response = await _userAuthService.registerUser(request); //returns null if user exists
             if (response == null) return BadRequest(new { message = "Username or Email already exists" });
             if (response.Email == null) return BadRequest(new { message = "Username or Email already exists" });
             if (response.Username == null) return BadRequest(new { message = "Username or Email already exists" });
@@ -37,7 +37,7 @@ namespace paymatesapi.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthenticationResponse>> Login(UserCreds creds)
         {
-            var response = await _userService.loginUser(creds);
+            var response = await _userAuthService.loginUser(creds);
             if (response.Uid == null) return BadRequest(new { message = "Username or Password is incorrect" });
             return Ok(response);
         }
@@ -45,7 +45,7 @@ namespace paymatesapi.Controllers
         [HttpPost("refresh-token")]
         public ActionResult<string> RefreshToken(RefreshTokenRequest requestBody)
         {
-            AuthenticationResponse user = _userService.getUser(requestBody.Uid);
+            AuthenticationResponse user = _userAuthService.getUser(requestBody.Uid);
             if (user == null) return BadRequest("User does not exist");
             if (user.Uid == null) return BadRequest("User does not exist");
             if (user.RefreshToken == null) return BadRequest(new { message = "Invalid Refresh token" });

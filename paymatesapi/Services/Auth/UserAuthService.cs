@@ -9,11 +9,11 @@ using System;
 
 namespace paymatesapi.Services
 {
-    public class UserService : IUserService
+    public class UserAuthService : IUserAuthService
     {
         private readonly DataContext _dataContext;
         private readonly IJwtUtils _jwtUitls;
-        public UserService(DataContext dataContext, IJwtUtils jwtUtils)
+        public UserAuthService(DataContext dataContext, IJwtUtils jwtUtils)
         {
             _dataContext = dataContext;
             _jwtUitls = jwtUtils;

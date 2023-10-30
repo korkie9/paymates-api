@@ -1,6 +1,5 @@
 using paymatesapi.DTOs;
 using paymatesapi.Models;
-using paymatesapi.Entities;
 
 namespace paymatesapi.Services
 {
@@ -8,7 +7,7 @@ namespace paymatesapi.Services
     {
         Task<string> addFriend(string userUid, string friendUid);
         Task<bool> deleteFriend(string userUid, string friendUid);
-
+        List<UserResponse> GetFriendsOfUser(string userId);
 
     }
 }

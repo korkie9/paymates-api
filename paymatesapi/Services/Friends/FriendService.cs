@@ -35,6 +35,36 @@ namespace paymatesapi.Services
             return "Friend Added";
         }
 
+        // public List<Friend> GetFriends(string userId)
+        // {
+        //     var friends = _dataContext.Friends
+        //         .Where(f => f.FriendOneUid == userId || f.FriendTwoUid == userId)
+        //         .ToList();
+        //     return friends;
+        // }
+
+        public List<UserResponse> GetFriendsOfUser(string userId)
+        {
+            var userFriends = _dataContext.Users
+                .FromSqlInterpolated(
+                            $@"SELECT U2.Uid, U2.PhotoUrl, U2.FirstName, U2.LastName, U2.Username
+                            FROM Users AS U1
+                            INNER JOIN Friends AS F ON U1.Uid = F.FriendOneUid
+                            INNER JOIN Users AS U2 ON U2.Uid = F.FriendTwoUid
+                            WHERE U1.Uid = {userId}"
+                            )
+                    .Select(u => new UserResponse
+                    {
+                        Uid = u.Uid,
+                        PhotoUrl = u.PhotoUrl,
+                        Username = u.Username,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName
+                    })
+                .ToList();
+            return userFriends;
+        }
+
         public async Task<bool> deleteFriend(string userUid, string friendUid)
         {
             var friendPair = _dataContext.Friends.Find(userUid, friendUid);

@@ -7,7 +7,7 @@ using paymatesapi.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using paymatesapi.Helpers;
-
+using paymatesapi.Models;
 
 namespace paymatesapi.Controllers
 {
@@ -27,7 +27,7 @@ namespace paymatesapi.Controllers
         [HttpPost("add-friend"), Authorize]
         public async Task<ActionResult<string>> AddFriend(FriendDTO request)
         {
-            var userId = GetUidFromHeaders();
+            var userId = _jwtUtils.GetUidFromHeaders();
             if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
 
             string user = await _friendService.addFriend(userId, request.FriendUid);
@@ -40,7 +40,7 @@ namespace paymatesapi.Controllers
         public async Task<ActionResult<string>> RemoveFriend(FriendDTO creds)
         {
             //TODO: Once transactions are created, this controller must be updated to delete ascociated transactions
-            var userId = GetUidFromHeaders();
+            var userId = _jwtUtils.GetUidFromHeaders();
             if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
 
             var userIsDeleted = await _friendService.deleteFriend(userId, creds.FriendUid);
@@ -49,12 +49,13 @@ namespace paymatesapi.Controllers
         }
 
         [HttpGet("get-friends"), Authorize]
-        public ActionResult<string> GetFriends()
+        public ActionResult<List<UserResponse>> GetUserFriends()
         {
-            var userId = GetUidFromHeaders();
+            var userId = _jwtUtils.GetUidFromHeaders();
             if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
-
-            return Ok("Hello");
+            var friends = _friendService.GetFriendsOfUser(userId);
+            if (friends == null) return BadRequest("An error occured. Friend could not be found.");
+            return Ok(friends);
         }
         [HttpGet("test"), Authorize]
         public ActionResult<string> Test()
@@ -62,19 +63,6 @@ namespace paymatesapi.Controllers
             return Ok("hello world");
         }
 
-        private string GetUidFromHeaders()
-        {
-            List<Claim> claims = _jwtUtils.GetClaimsFromHeaderToken();
 
-            if (claims.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            var userId = claims.FirstOrDefault(c => c.Type == "Uid")?.Value;
-            if (String.IsNullOrEmpty(userId)) return string.Empty;
-            return userId;
-
-        }
     }
 }

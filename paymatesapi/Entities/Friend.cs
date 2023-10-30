@@ -9,5 +9,6 @@ namespace paymatesapi.Entities
         public required string FriendOneUid { get; set; }
 
         public required string FriendTwoUid { get; set; }
+        public ICollection<Transaction>? Transactions { get; set; }
     }
 }

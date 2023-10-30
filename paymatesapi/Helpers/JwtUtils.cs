@@ -18,6 +18,8 @@ namespace paymatesapi.Helpers
         public string GenerateRefreshToken();
         public List<Claim> GetClaimsFromHeaderToken();
         // public int? ValidateJwtToken(string? token);
+
+        public string GetUidFromHeaders();
     }
 
     public class JwtUtils : IJwtUtils
@@ -94,5 +96,20 @@ namespace paymatesapi.Helpers
 
             return claims;
         }
+        public string GetUidFromHeaders()
+        {
+            List<Claim> claims = GetClaimsFromHeaderToken();
+
+            if (claims.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var userId = claims.FirstOrDefault(c => c.Type == "Uid")?.Value;
+            if (String.IsNullOrEmpty(userId)) return string.Empty;
+            return userId;
+
+        }
+
     }
 }

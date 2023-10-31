@@ -72,7 +72,7 @@ namespace paymatesapi.Services
             if (friendPair != null)
             {
                 _dataContext.Entry(friendPair).State = EntityState.Deleted;
-                _dataContext.SaveChanges();
+                await _dataContext.SaveChangesAsync();
                 return true;
             }
             return false;

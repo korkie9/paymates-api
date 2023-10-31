@@ -58,7 +58,7 @@ namespace paymatesapi.Controllers
                 return Unauthorized(new { message = "Session has expired." });
             }
 
-            string token = _jwtUtils.GenerateJwtToken(user);
+            var token = _jwtUtils.GenerateJwtToken(user);
             if (token == "error") return BadRequest(new { message = "There was an issue generating your refresh token" });
             return Ok(token);
         }

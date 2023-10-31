@@ -37,7 +37,7 @@ namespace paymatesapi.Controllers
         }
 
         [HttpDelete("remove-friend"), Authorize]
-        public async Task<ActionResult<string>> RemoveFriend(FriendDTO creds)
+        public async Task<IActionResult> RemoveFriend(FriendDTO creds)
         {
             //TODO: Once transactions are created, this controller must be updated to delete ascociated transactions
             var userId = _jwtUtils.GetUidFromHeaders();

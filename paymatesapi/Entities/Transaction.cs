@@ -18,7 +18,7 @@ namespace paymatesapi.Entities
 
         public required string CreditorUid { get; set; }
 
-        public required DateTime DateTime { get; set; }
+        public required DateTime CreatedAt { get; set; }
         public Friend FriendPair { get; set; }
 
     }

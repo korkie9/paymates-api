@@ -14,24 +14,43 @@ namespace paymatesapi.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
+        private readonly IJwtUtils _jwtUtils;
         private readonly ITransactionService _transactionService;
 
-        public TransactionsController(ITransactionService transactionService)
+        public TransactionsController(ITransactionService transactionService, IJwtUtils jwtUtils)
         {
+            _jwtUtils = jwtUtils;
             _transactionService = transactionService;
         }
 
         [HttpPost("create-transaction"), Authorize]
-        public ActionResult<Transaction> CreateTransaction(TransactionDTO transactionDTO)
+        public async Task<IActionResult> CreateTransaction(TransactionDTO transactionDTO)
         {
-            Transaction newTransaction = _transactionService.createTransaction(transactionDTO);
+            var userId = _jwtUtils.GetUidFromHeaders();
+            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
+            if (transactionDTO.FriendUid == null) return BadRequest(new { messge = "Friend ID is required" });
+
+            Transaction newTransaction = await _transactionService.createTransaction(userId, transactionDTO);
             return Ok(newTransaction);
         }
 
         [HttpPost("get-transactions"), Authorize]
-        public ActionResult<Transaction> GetTransactions(TransactionDTO transactionDTO)
+        public ActionResult<ICollection<Transaction>> GetTransactions(string friendUid)
         {
-            return Ok("hello world");
+            var userId = _jwtUtils.GetUidFromHeaders();
+            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
+
+            var transactions = _transactionService.getTransactions(userId, friendUid);
+            if (transactions == null) return NotFound(new { message = "Transactions not found" });
+            return Ok(transactions);
+        }
+
+        [HttpPost("get-transaction"), Authorize]
+        public ActionResult<Transaction> GetTransaction(string transactionUid)
+        {
+            var transaction = _transactionService.getTransaction(transactionUid);
+            if (transaction == null) return NotFound(new { message = "Transaction not found" });
+            return Ok(transaction);
         }
 
     }

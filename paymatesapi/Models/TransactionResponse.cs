@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
-using paymatesapi.Entities;
-namespace paymatesapi.DTOs
+namespace paymatesapi.Model
 {
-    public class TransactionDTO
+    public class TransactionResponse
     {
-        public string? Icon { get; set; }
+        public required string Uid { get; set; }
+
+        public required string? Icon { get; set; }
         public required string Title { get; set; }
 
         public required decimal Amount { get; set; }
@@ -15,7 +15,6 @@ namespace paymatesapi.DTOs
 
         public required DateTime CreatedAt { get; set; }
 
-        public string? FriendUid { get; set; }
-
     }
+
 }

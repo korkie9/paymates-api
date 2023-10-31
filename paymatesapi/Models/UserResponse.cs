@@ -5,8 +5,8 @@ namespace paymatesapi.Models
 {
     public class UserResponse
     {
-        public string Uid { get; set; }
-        public string PhotoUrl { get; set; }
+        public required string Uid { get; set; }
+        public string? PhotoUrl { get; set; }
 
         public required string Username { get; set; }
 

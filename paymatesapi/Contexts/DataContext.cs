@@ -7,10 +7,13 @@ namespace paymatesapi.Contexts
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Friend>().HasMany(f => f.Transactions)
-                .WithOne(t => t.FriendPair);
+            modelBuilder.Entity<Friend>()
+                .HasMany(f => f.Transactions)
+                .WithOne(t => t.FriendPair)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Friend>().Navigation(f => f.Transactions)
+            modelBuilder.Entity<Friend>()
+                .Navigation(f => f.Transactions)
                 .UsePropertyAccessMode(PropertyAccessMode.Property); // Use property access mode.
 
             base.OnModelCreating(modelBuilder);

@@ -16,29 +16,48 @@ namespace paymatesapi.Services
             _dataContext = dataContext;
         }
 
-        public Transaction createTransaction(TransactionDTO transactionDTO)
+        public async Task<Transaction> createTransaction(string userUid, TransactionDTO transactionDTO)
         {
-            Guid guid = Guid.NewGuid();
-            Transaction newTransaction = new Transaction
+            Friend friend = _dataContext.Friends.FirstOrDefault(f =>
+                (f.FriendOneUid == userUid && f.FriendTwoUid == transactionDTO.FriendUid) ||
+                (f.FriendOneUid == transactionDTO.FriendUid && f.FriendTwoUid == userUid)
+            );
+
+            if (friend != null)
             {
-                Uid = guid.ToString(),
-                Icon = transactionDTO.Icon ?? null,
-                Title = transactionDTO.Title,
-                Amount = transactionDTO.Amount,
-                DebtorUid = transactionDTO.DebtorUid,
-                CreditorUid = transactionDTO.CreditorUid,
-                DateTime = transactionDTO.DateTime,
-            };
-            return newTransaction;
+                Guid guid = Guid.NewGuid();
+                Transaction newTransaction = new Transaction
+                {
+                    Uid = guid.ToString(),
+                    Icon = transactionDTO.Icon ?? null,
+                    Title = transactionDTO.Title,
+                    Amount = transactionDTO.Amount,
+                    DebtorUid = transactionDTO.DebtorUid,
+                    CreditorUid = transactionDTO.CreditorUid,
+                    CreatedAt = transactionDTO.CreatedAt,
+                    FriendPair = friend
+                };
+                friend.Transactions?.Add(newTransaction);
+                await _dataContext.SaveChangesAsync(); 
+                return newTransaction;
+            }
+
+            return null;
 
         }
 
         public ICollection<Transaction> getTransactions(string userUid, string friendUid)
         {
-            Friend friend = _dataContext.Friends
+            var friend = _dataContext.Friends
             .Include(f => f.Transactions)
             .FirstOrDefault(f => (f.FriendOneUid == userUid && f.FriendTwoUid == friendUid) || (f.FriendTwoUid == userUid && f.FriendOneUid == friendUid));
-            return friend.Transactions;
+            return friend?.Transactions ?? new List<Transaction>();
+        }
+
+        public Transaction? getTransaction(string transactionUid)
+        {
+            var dbTransaction = _dataContext.Transactions.Find(transactionUid);
+            return dbTransaction ?? null;
         }
 
     }

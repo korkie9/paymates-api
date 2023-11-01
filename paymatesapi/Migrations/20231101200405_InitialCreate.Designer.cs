@@ -11,8 +11,8 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231022194940_Friends")]
-    partial class Friends
+    [Migration("20231101200405_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,15 +24,57 @@ namespace paymatesapi.Migrations
 
             modelBuilder.Entity("paymatesapi.Entities.Friend", b =>
                 {
+                    b.Property<int>("FriendId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("FriendOneUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FriendTwoUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("FriendId");
+
+                    b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("paymatesapi.Entities.Transaction", b =>
+                {
                     b.Property<string>("Uid")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("FriendUid")
-                        .HasColumnType("varchar(255)");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
 
-                    b.HasKey("Uid", "FriendUid");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
-                    b.ToTable("Friends");
+                    b.Property<string>("CreditorUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DebtorUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("FriendPairFriendId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Uid");
+
+                    b.HasIndex("FriendPairFriendId");
+
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("paymatesapi.Entities.User", b =>
@@ -76,6 +118,22 @@ namespace paymatesapi.Migrations
                     b.HasKey("Uid");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("paymatesapi.Entities.Transaction", b =>
+                {
+                    b.HasOne("paymatesapi.Entities.Friend", "FriendPair")
+                        .WithMany("Transactions")
+                        .HasForeignKey("FriendPairFriendId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FriendPair");
+                });
+
+            modelBuilder.Entity("paymatesapi.Entities.Friend", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

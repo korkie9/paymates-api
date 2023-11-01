@@ -11,8 +11,8 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231030225733_Transctions")]
-    partial class Transctions
+    [Migration("20231101204616_Transaction_6")]
+    partial class Transaction_6
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,13 +24,19 @@ namespace paymatesapi.Migrations
 
             modelBuilder.Entity("paymatesapi.Entities.Friend", b =>
                 {
+                    b.Property<int>("FriendId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
                     b.Property<string>("FriendOneUid")
-                        .HasColumnType("varchar(255)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("FriendTwoUid")
-                        .HasColumnType("varchar(255)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
-                    b.HasKey("FriendOneUid", "FriendTwoUid");
+                    b.HasKey("FriendId");
 
                     b.ToTable("Friends");
                 });
@@ -43,24 +49,19 @@ namespace paymatesapi.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("CreditorUid")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("DebtorUid")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("FriendPairFriendOneUid")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("FriendPairFriendTwoUid")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
+                    b.Property<int>("FriendId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Icon")
                         .HasColumnType("longtext");
@@ -71,9 +72,9 @@ namespace paymatesapi.Migrations
 
                     b.HasKey("Uid");
 
-                    b.HasIndex("FriendPairFriendOneUid", "FriendPairFriendTwoUid");
+                    b.HasIndex("FriendId");
 
-                    b.ToTable("Transaction");
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("paymatesapi.Entities.User", b =>
@@ -123,7 +124,7 @@ namespace paymatesapi.Migrations
                 {
                     b.HasOne("paymatesapi.Entities.Friend", "FriendPair")
                         .WithMany("Transactions")
-                        .HasForeignKey("FriendPairFriendOneUid", "FriendPairFriendTwoUid")
+                        .HasForeignKey("FriendId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

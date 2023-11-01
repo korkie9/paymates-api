@@ -16,13 +16,13 @@ namespace paymatesapi.Services
             _dataContext = dataContext;
         }
 
-        public async Task<Transaction> createTransaction(string userUid, TransactionDTO transactionDTO)
+        public async Task<Transaction> createTransaction(TransactionDTO transactionDTO)
         {
             Friend friend = _dataContext.Friends.FirstOrDefault(f =>
-                (f.FriendOneUid == userUid && f.FriendTwoUid == transactionDTO.FriendUid) ||
-                (f.FriendOneUid == transactionDTO.FriendUid && f.FriendTwoUid == userUid)
+                (f.FriendOneUid == transactionDTO.DebtorUid && f.FriendTwoUid == transactionDTO.CreditorUid) ||
+                (f.FriendOneUid == transactionDTO.CreditorUid && f.FriendTwoUid == transactionDTO.DebtorUid)
             );
-
+            var createdAt = DateTime.Now;
             if (friend != null)
             {
                 Guid guid = Guid.NewGuid();
@@ -34,11 +34,20 @@ namespace paymatesapi.Services
                     Amount = transactionDTO.Amount,
                     DebtorUid = transactionDTO.DebtorUid,
                     CreditorUid = transactionDTO.CreditorUid,
-                    CreatedAt = transactionDTO.CreatedAt,
+                    CreatedAt = createdAt,
                     FriendPair = friend
                 };
-                friend.Transactions?.Add(newTransaction);
-                await _dataContext.SaveChangesAsync(); 
+                try
+                {
+
+                    friend.Transactions?.Add(newTransaction);
+                    await _dataContext.SaveChangesAsync();
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine($"Returned with error: '{e}'");
+                    return null;
+                }
                 return newTransaction;
             }
 

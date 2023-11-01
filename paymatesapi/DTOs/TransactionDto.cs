@@ -13,9 +13,5 @@ namespace paymatesapi.DTOs
 
         public required string CreditorUid { get; set; }
 
-        public required DateTime CreatedAt { get; set; }
-
-        public string? FriendUid { get; set; }
-
     }
 }

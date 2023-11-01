@@ -26,11 +26,15 @@ namespace paymatesapi.Controllers
         [HttpPost("create-transaction"), Authorize]
         public async Task<IActionResult> CreateTransaction(TransactionDTO transactionDTO)
         {
-            var userId = _jwtUtils.GetUidFromHeaders();
-            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
-            if (transactionDTO.FriendUid == null) return BadRequest(new { messge = "Friend ID is required" });
+            if (transactionDTO.DebtorUid == null) return BadRequest(new { messge = "Debtor ID is required" });
+            if (transactionDTO.CreditorUid == null) return BadRequest(new { messge = "Creditor ID is required" });
 
-            Transaction newTransaction = await _transactionService.createTransaction(userId, transactionDTO);
+
+            Transaction newTransaction = await _transactionService.createTransaction(transactionDTO);
+            if (newTransaction == null)
+            {
+                return BadRequest(new { message = "No suitable friend pair found for the transaction." });
+            }
             return Ok(newTransaction);
         }
 
@@ -51,6 +55,16 @@ namespace paymatesapi.Controllers
             var transaction = _transactionService.getTransaction(transactionUid);
             if (transaction == null) return NotFound(new { message = "Transaction not found" });
             return Ok(transaction);
+        }
+
+        [HttpDelete("delete-transaction"), Authorize]
+        public ActionResult<Transaction> DeleteTransaction(string transactionUid)
+        {
+            return Ok();
+            // {
+            //     var transaction = _transactionService.delete(transactionUid);
+            //     if (transaction == false) return NotFound(new { message = "Transaction not found" });
+            //     return Ok(transaction);
         }
 
     }

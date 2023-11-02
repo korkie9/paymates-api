@@ -6,6 +6,9 @@ using System.Text;
 using paymatesapi.Entities;
 using System.Security.Cryptography;
 using paymatesapi.Models;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace paymatesapi.Helpers
 {
@@ -13,22 +16,27 @@ namespace paymatesapi.Helpers
     {
         public string GenerateJwtToken(AuthenticationResponse user);
         public string GenerateRefreshToken();
+        public List<Claim> GetClaimsFromHeaderToken();
         // public int? ValidateJwtToken(string? token);
+
+        public string GetUidFromHeaders();
     }
 
     public class JwtUtils : IJwtUtils
     {
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         // private readonly AppSettings _appSettings;
 
-        public JwtUtils(IConfiguration configuration)
+        public JwtUtils(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
+            _httpContextAccessor = httpContextAccessor;
             _configuration = configuration;
         }
 
         public string GenerateJwtToken(AuthenticationResponse user)
         {
-            if(user == null) return "error";
+            if (user == null) return "error";
             if (user?.Uid == null) return "error";
             if (user?.FirstName == null) return "error";
             if (user?.LastName == null) return "error";
@@ -64,37 +72,44 @@ namespace paymatesapi.Helpers
             rng.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
         }
+        public List<Claim> GetClaimsFromHeaderToken()
+        {
+            List<Claim> claims = new List<Claim>();
 
-        // public int? ValidateJwtToken(string? token)
-        // {
-        //     if (token == null)
-        //         return null;
+            if (_httpContextAccessor?.HttpContext?.Request?.Headers.TryGetValue("Authorization", out var authHeaderValues) == true)
+            {
+                string authHeaderValue = authHeaderValues.FirstOrDefault()?.ToString() ?? string.Empty;
 
-        //     var tokenHandler = new JwtSecurityTokenHandler();
-        //     var key = Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt:Token").Value!);
-        //     try
-        //     {
-        //         tokenHandler.ValidateToken(token, new TokenValidationParameters
-        //         {
-        //             ValidateIssuerSigningKey = true,
-        //             IssuerSigningKey = new SymmetricSecurityKey(key),
-        //             ValidateIssuer = false,
-        //             ValidateAudience = false,
-        //             // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-        //             ClockSkew = TimeSpan.Zero
-        //         }, out SecurityToken validatedToken);
+                if (!string.IsNullOrEmpty(authHeaderValue) && authHeaderValue.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    string token = authHeaderValue.Substring("Bearer ".Length);
 
-        //         var jwtToken = (JwtSecurityToken)validatedToken;
-        //         var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var securityToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
 
-        //         // return user id from JWT token if validation successful
-        //         return userId;
-        //     }
-        //     catch
-        //     {
-        //         // return null if validation fails
-        //         return null;
-        //     }
-        // }
+                    if (securityToken != null)
+                    {
+                        claims = securityToken.Claims.ToList();
+                    }
+                }
+            }
+
+            return claims;
+        }
+        public string GetUidFromHeaders()
+        {
+            List<Claim> claims = GetClaimsFromHeaderToken();
+
+            if (claims.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var userId = claims.FirstOrDefault(c => c.Type == "Uid")?.Value;
+            if (String.IsNullOrEmpty(userId)) return string.Empty;
+            return userId;
+
+        }
+
     }
 }

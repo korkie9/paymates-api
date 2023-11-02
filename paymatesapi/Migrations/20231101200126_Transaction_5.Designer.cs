@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using paymatesapi.Contexts;
 
@@ -10,9 +11,11 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231101200126_Transaction_5")]
+    partial class Transaction_5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,7 @@ namespace paymatesapi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("FriendId")
+                    b.Property<int>("FriendPairFriendId")
                         .HasColumnType("int");
 
                     b.Property<string>("Icon")
@@ -69,7 +72,7 @@ namespace paymatesapi.Migrations
 
                     b.HasKey("Uid");
 
-                    b.HasIndex("FriendId");
+                    b.HasIndex("FriendPairFriendId");
 
                     b.ToTable("Transactions");
                 });
@@ -121,7 +124,7 @@ namespace paymatesapi.Migrations
                 {
                     b.HasOne("paymatesapi.Entities.Friend", "FriendPair")
                         .WithMany("Transactions")
-                        .HasForeignKey("FriendId")
+                        .HasForeignKey("FriendPairFriendId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

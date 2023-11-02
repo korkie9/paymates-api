@@ -9,11 +9,11 @@ using System;
 
 namespace paymatesapi.Services
 {
-    public class UserService : IUserService
+    public class UserAuthService : IUserAuthService
     {
         private readonly DataContext _dataContext;
         private readonly IJwtUtils _jwtUitls;
-        public UserService(DataContext dataContext, IJwtUtils jwtUtils)
+        public UserAuthService(DataContext dataContext, IJwtUtils jwtUtils)
         {
             _dataContext = dataContext;
             _jwtUitls = jwtUtils;
@@ -34,10 +34,9 @@ namespace paymatesapi.Services
             var dbUser = _dataContext.Users.Find(id);
             return new AuthenticationResponse(dbUser);
         }
-        public async Task<AuthenticationResponse> registerUser(UserDTO user) //add refresh token instead of access token
+        public async Task<AuthenticationResponse> registerUser(UserDTO user)
         {
             var dbUser = _dataContext.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
-            //TODO: Test this
             if (dbUser == true) return new AuthenticationResponse(null);
             Guid guid = Guid.NewGuid();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
@@ -59,7 +58,7 @@ namespace paymatesapi.Services
 
             return new AuthenticationResponse(newUser);
         }
-        public async Task<AuthenticationResponse>  loginUser(UserCreds creds) //add refresh token instead of access token
+        public async Task<AuthenticationResponse> loginUser(UserCreds creds)
         {
             var dbUser = _dataContext.Users.Where(u => u.Username == creds.Username || u.Email == creds.Username).FirstOrDefault();
             if (dbUser == null) return new AuthenticationResponse(null);

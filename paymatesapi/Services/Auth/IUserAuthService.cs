@@ -4,7 +4,7 @@ using paymatesapi.Entities;
 
 namespace paymatesapi.Services
 {
-    public interface IUserService
+    public interface IUserAuthService
     {
         AuthenticationResponse getUser(string id);
         Task<AuthenticationResponse> registerUser(UserDTO user);

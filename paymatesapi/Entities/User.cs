@@ -25,8 +25,11 @@ namespace paymatesapi.Entities
 
         public required string RefreshToken { get; set; }
 
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")] 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         public required DateTime RefreshTokenExpiry { get; set; }
+
+        [JsonIgnore]
+        public ICollection<BankAccount> BankAccounts { get; } = new List<BankAccount>();
 
     }
 }

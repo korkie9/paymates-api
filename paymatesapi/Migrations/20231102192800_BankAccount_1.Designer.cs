@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using paymatesapi.Contexts;
 
@@ -10,9 +11,11 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231102192800_BankAccount_1")]
+    partial class BankAccount_1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace paymatesapi.Migrations
 
                     b.HasIndex("UserUid");
 
-                    b.ToTable("BankAccounts");
+                    b.ToTable("BankAccount");
                 });
 
             modelBuilder.Entity("paymatesapi.Entities.Friend", b =>

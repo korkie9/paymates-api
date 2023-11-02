@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using paymatesapi.Entities;
+using System.Text.Json.Serialization;
 
 namespace paymatesapi.Entities
 {
@@ -25,8 +27,11 @@ namespace paymatesapi.Entities
 
         public required string RefreshToken { get; set; }
 
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")] 
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:MM/dd/yyyy}")]
         public required DateTime RefreshTokenExpiry { get; set; }
+
+        [JsonIgnore]
+        public ICollection<BankAccount> BankAccounts { get; } = new List<BankAccount>();
 
     }
 }

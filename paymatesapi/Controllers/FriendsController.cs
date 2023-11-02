@@ -58,12 +58,6 @@ namespace paymatesapi.Controllers
             if (friends == null) return BadRequest("An error occured. Friend could not be found.");
             return Ok(friends);
         }
-        [HttpGet("test"), Authorize]
-        public ActionResult<string> Test()
-        {
-            return Ok("hello world");
-        }
-
 
     }
 }

@@ -18,7 +18,7 @@ namespace paymatesapi.Services
 
         public async Task<Transaction> createTransaction(TransactionDTO transactionDTO)
         {
-            Friend friend = _dataContext.Friends.FirstOrDefault(f =>
+            var friend = _dataContext.Friends.FirstOrDefault(f =>
                 (f.FriendOneUid == transactionDTO.DebtorUid && f.FriendTwoUid == transactionDTO.CreditorUid) ||
                 (f.FriendOneUid == transactionDTO.CreditorUid && f.FriendTwoUid == transactionDTO.DebtorUid)
             );
@@ -67,6 +67,19 @@ namespace paymatesapi.Services
         {
             var dbTransaction = _dataContext.Transactions.Find(transactionUid);
             return dbTransaction ?? null;
+        }
+
+        public async Task<bool> deleteTransaction(string transactionUid)
+        {
+            var transaction = _dataContext.Transactions.Find(transactionUid);
+            if (transaction != null)
+            {
+                _dataContext.Entry(transaction).State = EntityState.Deleted;
+                await _dataContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
+
         }
 
     }

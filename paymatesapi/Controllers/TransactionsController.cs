@@ -50,21 +50,20 @@ namespace paymatesapi.Controllers
         }
 
         [HttpPost("get-transaction"), Authorize]
-        public ActionResult<Transaction> GetTransaction(string transactionUid)
+        public ActionResult<Transaction> GetTransaction(TransactionRequest transactionRequest)
         {
-            var transaction = _transactionService.getTransaction(transactionUid);
+            var transaction = _transactionService.getTransaction(transactionRequest.TransactionUid);
             if (transaction == null) return NotFound(new { message = "Transaction not found" });
             return Ok(transaction);
         }
 
         [HttpDelete("delete-transaction"), Authorize]
-        public ActionResult<Transaction> DeleteTransaction(string transactionUid)
+        public async Task<IActionResult> DeleteTransaction(TransactionRequest transactionRequest)
         {
-            return Ok();
-            // {
-            //     var transaction = _transactionService.delete(transactionUid);
-            //     if (transaction == false) return NotFound(new { message = "Transaction not found" });
-            //     return Ok(transaction);
+
+            var transaction = await _transactionService.deleteTransaction(transactionRequest.TransactionUid);
+            if (transaction == false) return NotFound(new { message = "Transaction not found" });
+            return Ok(new { message = "Transaction deleted" });
         }
 
     }

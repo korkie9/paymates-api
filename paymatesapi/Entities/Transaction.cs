@@ -21,7 +21,7 @@ namespace paymatesapi.Entities
         public required DateTime CreatedAt { get; set; }
 
         public int FriendId { get; set; }
-        public Friend FriendPair { get; set; }
+        public Friend? FriendPair { get; set; }
 
     }
 

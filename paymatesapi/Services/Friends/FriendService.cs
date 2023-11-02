@@ -65,9 +65,12 @@ namespace paymatesapi.Services
             return userFriends;
         }
 
-        public async Task<bool> deleteFriend(string friendId)
+        public async Task<bool> deleteFriend(string userId, string friendUid)
         {
-            var friendPair = _dataContext.Friends.Find(friendId);
+            var friendPair = _dataContext.Friends.FirstOrDefault(f => 
+                (f.FriendOneUid == userId && f.FriendTwoUid == friendUid) || 
+                (f.FriendTwoUid == userId && f.FriendOneUid == friendUid)
+            );
             //TODO: modify return to inform client if friendPair doesn't exist
             if (friendPair != null)
             {

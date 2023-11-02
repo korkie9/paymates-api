@@ -9,6 +9,8 @@ namespace paymatesapi.Services
         ICollection<Transaction>? getTransactions(string userUid, string friendUid);
         Transaction? getTransaction(string transactionUid);
 
+        Task<bool> deleteTransaction(string transactionUid);
+
 
     }
 }

@@ -43,7 +43,7 @@ namespace paymatesapi.Controllers
             var userId = _jwtUtils.GetUidFromHeaders();
             if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
 
-            var userIsDeleted = await _friendService.deleteFriend(creds.FriendUid);
+            var userIsDeleted = await _friendService.deleteFriend(userId, creds.FriendUid);
             if (userIsDeleted) return Ok("Friend was removed");
             return BadRequest("An error occured. Friend could not be deleted.");
         }
@@ -53,6 +53,7 @@ namespace paymatesapi.Controllers
         {
             var userId = _jwtUtils.GetUidFromHeaders();
             if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
+
             var friends = _friendService.GetFriendsOfUser(userId);
             if (friends == null) return BadRequest("An error occured. Friend could not be found.");
             return Ok(friends);

@@ -17,7 +17,7 @@ namespace paymatesapi.Controllers
         {
         }
 
-        [HttpPost("add-bank-account"), Authorize]
+        [HttpPost("add-bank-account"), Authorize] //TODO: get id from params
         public ActionResult AddBankAccount(BankAccountDto bankDto)
         {
             return Ok(bankDto);

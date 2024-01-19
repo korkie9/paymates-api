@@ -16,13 +16,13 @@ namespace paymatesapi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("paymatesapi.Entities.BankAccount", b =>
                 {
                     b.Property<string>("BankAccountUid")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(95)");
 
                     b.Property<string>("AccountNumber")
                         .IsRequired()
@@ -42,7 +42,7 @@ namespace paymatesapi.Migrations
 
                     b.Property<string>("UserUid")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(95)");
 
                     b.HasKey("BankAccountUid");
 
@@ -73,13 +73,13 @@ namespace paymatesapi.Migrations
             modelBuilder.Entity("paymatesapi.Entities.Transaction", b =>
                 {
                     b.Property<string>("Uid")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(95)");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("CreditorUid")
                         .IsRequired()
@@ -109,7 +109,7 @@ namespace paymatesapi.Migrations
             modelBuilder.Entity("paymatesapi.Entities.User", b =>
                 {
                     b.Property<string>("Uid")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(95)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -136,8 +136,8 @@ namespace paymatesapi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("RefreshTokenExpiry")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long>("RefreshTokenExpiry")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Username")
                         .IsRequired()

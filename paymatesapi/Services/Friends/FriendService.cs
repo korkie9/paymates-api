@@ -51,7 +51,7 @@ namespace paymatesapi.Services
                             FROM Users AS U1
                             INNER JOIN Friends AS F ON U1.Uid = F.FriendOneUid
                             INNER JOIN Users AS U2 ON U2.Uid = F.FriendTwoUid
-                            WHERE U1.Uid = {userId}"
+                            WHERE U1.Uid = '{userId}'"
                             )
                     .Select(u => new UserResponse
                     {

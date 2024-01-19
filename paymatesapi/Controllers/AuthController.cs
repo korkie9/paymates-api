@@ -53,7 +53,7 @@ namespace paymatesapi.Controllers
             {
                 return Unauthorized(new { message = "Invalid Refresh Token." });
             }
-            else if (user?.RefreshTokenExpiry < DateTime.Now)
+            else if (user?.RefreshTokenExpiry <  DateTime.Now.ToFileTimeUtc())
             {
                 return Unauthorized(new { message = "Session has expired." });
             }

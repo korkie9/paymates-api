@@ -3,6 +3,7 @@ using paymatesapi.Entities;
 using System;
 using Microsoft.EntityFrameworkCore;
 using paymatesapi.DTOs;
+using paymatesapi.Models;
 
 
 namespace paymatesapi.Services
@@ -16,7 +17,7 @@ namespace paymatesapi.Services
             _dataContext = dataContext;
         }
 
-        public async Task<Transaction> createTransaction(TransactionDTO transactionDTO)
+        public async Task<BaseResponse<Transaction>> createTransaction(TransactionDTO transactionDTO)
         {
             var friend = _dataContext.Friends.FirstOrDefault(f =>
                 (f.FriendOneUid == transactionDTO.DebtorUid && f.FriendTwoUid == transactionDTO.CreditorUid) ||
@@ -46,12 +47,12 @@ namespace paymatesapi.Services
                 catch (IOException e)
                 {
                     Console.WriteLine($"Returned with error: '{e}'");
-                    return null;
+                    return new BaseResponse<Transaction> { Error = new Error { message = "Interal Server Error" } };
                 }
-                return newTransaction;
+                return new BaseResponse<Transaction>{ Data = newTransaction };
             }
 
-            return null;
+            return new BaseResponse<Transaction> { Error = new Error { message = "Friend pair not found" } };
 
         }
 

@@ -27,7 +27,7 @@ namespace paymatesapi.Services
             Email = "werfrw@sewrf.com",
             Password = "erfwefwf",
             RefreshToken = "dfbedrtrdfgb",
-            RefreshTokenExpiry = DateTime.Now.AddHours(1)
+            RefreshTokenExpiry = DateTime.Now.AddHours(1).ToFileTimeUtc()
         };
         public AuthenticationResponse getUser(string id)
         {
@@ -51,7 +51,7 @@ namespace paymatesapi.Services
                 PhotoUrl = user.PhotoUrl ?? null,
                 Password = passwordHash,
                 RefreshToken = newRefreshToken,
-                RefreshTokenExpiry = DateTime.Now.AddHours(1)
+                RefreshTokenExpiry = DateTime.Now.AddHours(1).ToFileTimeUtc()
             };
             _dataContext.Add(newUser);
             await _dataContext.SaveChangesAsync();
@@ -66,7 +66,7 @@ namespace paymatesapi.Services
 
             var refreshToken = _jwtUitls.GenerateRefreshToken();
             dbUser.RefreshToken = refreshToken;
-            dbUser.RefreshTokenExpiry = DateTime.Now.AddHours(1);
+            dbUser.RefreshTokenExpiry = DateTime.Now.AddHours(1).ToFileTimeUtc();
             await _dataContext.SaveChangesAsync();
             return new AuthenticationResponse(dbUser);
         }

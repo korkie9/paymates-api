@@ -30,10 +30,11 @@ namespace paymatesapi.Controllers
             if (transactionDTO.CreditorUid == null) return BadRequest(new { messge = "Creditor ID is required" });
 
 
-            Transaction newTransaction = await _transactionService.createTransaction(transactionDTO);
-            if (newTransaction == null)
+            BaseResponse<Transaction> newTransaction = await _transactionService.createTransaction(transactionDTO);
+            if (newTransaction.Error != null)
             {
-                return BadRequest(new { message = "No suitable friend pair found for the transaction." });
+                var errResponse = new BaseResponse<Transaction> { Error = new Error { message = newTransaction.Error.message }};
+                return BadRequest(errResponse);
             }
             return Ok(newTransaction);
         }

@@ -9,39 +9,28 @@ using System;
 
 namespace paymatesapi.Services
 {
-    public class UserAuthService : IUserAuthService
+    public class UserAuthService(DataContext dataContext, IJwtUtils jwtUtils) : IUserAuthService
     {
-        private readonly DataContext _dataContext;
-        private readonly IJwtUtils _jwtUitls;
-        public UserAuthService(DataContext dataContext, IJwtUtils jwtUtils)
-        {
-            _dataContext = dataContext;
-            _jwtUitls = jwtUtils;
-        }
-        private static User dummyUser = new User
-        {
-            Uid = "ewrferf",
-            FirstName = "randow",
-            LastName = "korkie",
-            Username = "korkews",
-            Email = "werfrw@sewrf.com",
-            Password = "erfwefwf",
-            RefreshToken = "dfbedrtrdfgb",
-            RefreshTokenExpiry = DateTime.Now.AddHours(1).ToFileTimeUtc()
-        };
-        public AuthenticationResponse getUser(string id)
+        private readonly DataContext _dataContext = dataContext;
+
+        private readonly IJwtUtils _jwtUitls = jwtUtils;
+
+        public BaseResponse<User> GetUser(string id)
         {
             var dbUser = _dataContext.Users.Find(id);
-            return new AuthenticationResponse(dbUser);
+            if (dbUser == null) {
+                return new BaseResponse<User>{ Error = new Error { Message = "This user does not exist" } };
+            }
+            return new BaseResponse<User>{Data = dbUser};
         }
-        public async Task<AuthenticationResponse> registerUser(UserDTO user)
+        public async Task<BaseResponse<User>> RegisterUser(UserDTO user)
         {
             var dbUser = _dataContext.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
-            if (dbUser == true) return new AuthenticationResponse(null);
+            if (dbUser == true) return new BaseResponse<User> { Error = new Error { Message = "User already exists" } };
             Guid guid = Guid.NewGuid();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
             string newRefreshToken = _jwtUitls.GenerateRefreshToken();
-            User newUser = new User
+            User newUser = new()
             {
                 Uid = guid.ToString(),
                 FirstName = user.FirstName,
@@ -55,28 +44,41 @@ namespace paymatesapi.Services
             };
             _dataContext.Add(newUser);
             await _dataContext.SaveChangesAsync();
+            
 
-            return new AuthenticationResponse(newUser);
+            return new BaseResponse<User> {Data = newUser} ;
         }
-        public async Task<AuthenticationResponse> loginUser(UserCreds creds)
+        public async Task<BaseResponse<User>> LoginUser(UserCreds creds)
         {
             var dbUser = _dataContext.Users.Where(u => u.Username == creds.Username || u.Email == creds.Username).FirstOrDefault();
-            if (dbUser == null) return new AuthenticationResponse(null);
-            if (!BCrypt.Net.BCrypt.Verify(creds.Password, dbUser.Password)) return new AuthenticationResponse(null);
+            if (dbUser == null) return new BaseResponse<User> { 
+                Error = new Error { Message = "User does not exist" }
+            };
+            if (!BCrypt.Net.BCrypt.Verify(creds.Password, dbUser.Password)) return new BaseResponse<User> {
+                Error = new Error { Message = "Credentials are incorrect" }
+            };
 
             var refreshToken = _jwtUitls.GenerateRefreshToken();
             dbUser.RefreshToken = refreshToken;
             dbUser.RefreshTokenExpiry = DateTime.Now.AddHours(1).ToFileTimeUtc();
             await _dataContext.SaveChangesAsync();
-            return new AuthenticationResponse(dbUser);
+            return new BaseResponse<User> { Data = dbUser };
         }
-        public bool deleteUser(string id)
+        public async Task<BaseResponse<bool>> DeleteUser(string uid)
         {
-            return true;
+            var dbUser = _dataContext.Users.Find(uid);
+            if(dbUser != null){
+            var deleted = _dataContext.Users.Remove(dbUser);
+            await _dataContext.SaveChangesAsync();
+             return new BaseResponse<bool> { Data = true};
+            }
+           return new BaseResponse<bool> { Data = false };
         }
-        public AuthenticationResponse updateUser(UserDTO user)
+        public async Task<BaseResponse<bool>> UpdateUser(UserDTO user)
         {
-            return new AuthenticationResponse(dummyUser);
+            var dbUser = _dataContext.Update(user);
+            await _dataContext.SaveChangesAsync();
+            return new BaseResponse<bool> { Data = true };
         }
 
     }

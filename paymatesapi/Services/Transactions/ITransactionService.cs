@@ -6,11 +6,13 @@ namespace paymatesapi.Services
 {
     public interface ITransactionService
     {
-        Task<BaseResponse<Transaction>> createTransaction(TransactionDTO transactionDTO);
-        ICollection<Transaction>? getTransactions(string userUid, string friendUid);
-        Transaction? getTransaction(string transactionUid);
+        Task<BaseResponse<Transaction>> CreateTransaction(TransactionDTO transactionDTO);
 
-        Task<bool> deleteTransaction(string transactionUid);
+        BaseResponse<ICollection<Transaction>>? GetTransactions(string userUid, string friendUid);
+
+        BaseResponse<Transaction>? GetTransaction(string transactionUid);
+
+        Task<BaseResponse<bool>> DeleteTransaction(string transactionUid);
 
 
     }

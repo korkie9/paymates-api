@@ -7,32 +7,35 @@ using Microsoft.EntityFrameworkCore;
 
 namespace paymatesapi.Services
 {
-    public class FriendService : IFriendService
+    public class FriendService(DataContext dataContext) : IFriendService
 
     {
 
-        private readonly DataContext _dataContext;
-        public FriendService(DataContext dataContext)
-        {
-            _dataContext = dataContext;
-        }
-        public async Task<string> addFriend(string userUid, string friendUid) //TODO: check if user is trying to add themselves
+        private readonly DataContext _dataContext = dataContext;
+
+        public async Task<BaseResponse<string>> AddFriend(string userUid, string friendUid) //TODO: check if user is trying to add themselves
         {
             var friendPair_1 = _dataContext.Friends.Any(f => f.FriendOneUid == userUid && f.FriendTwoUid == friendUid);
-            if (friendPair_1 != false) return "Users are already friends";
+            if (friendPair_1 != false) return new BaseResponse<string> {
+                Error = new Error{ Message = "Users are already friends"}
+            };
             var friendPair_2 = _dataContext.Friends.Any(f => f.FriendOneUid == friendUid && f.FriendTwoUid == userUid);
-            if (friendPair_2 != false) return "Users are already friends";
+            if (friendPair_2 != false) return new BaseResponse<string> {
+                Error = new Error{ Message = "Users are already friends"}
+            };
             var userOneExists = _dataContext.Users.Any(f => f.Uid == userUid);
             var userTwoExists = _dataContext.Users.Any(f => f.Uid == friendUid);
-            if (!userOneExists || !userTwoExists) return "User not found";
-            Friend newFriend = new Friend
+            if (!userOneExists || !userTwoExists)return new BaseResponse<string> {
+                Error = new Error{ Message = "Users not found"}
+            };
+            Friend newFriend = new()
             {
                 FriendOneUid = userUid,
                 FriendTwoUid = friendUid
             };
             _dataContext.Add(newFriend);
             await _dataContext.SaveChangesAsync();
-            return "Friend Added";
+            return new BaseResponse<string> { Data = "Friend added" };
         }
 
         // public List<Friend> GetFriends(string userId)
@@ -43,7 +46,7 @@ namespace paymatesapi.Services
         //     return friends;
         // }
 
-        public List<UserResponse> GetFriendsOfUser(string userId)
+        public BaseResponse<List<UserResponse>> GetFriendsOfUser(string userId)
         {
             var userFriends = _dataContext.Users
                 .FromSqlInterpolated(
@@ -62,23 +65,26 @@ namespace paymatesapi.Services
                         LastName = u.LastName
                     })
                 .ToList();
-            return userFriends;
+            return new BaseResponse<List<UserResponse>> { Data = userFriends };
         }
 
-        public async Task<bool> deleteFriend(string userId, string friendUid)
+        public async Task<BaseResponse<bool>> DeleteFriend(string userId, string friendUid)
         {
             var friendPair = _dataContext.Friends.FirstOrDefault(f => 
                 (f.FriendOneUid == userId && f.FriendTwoUid == friendUid) || 
                 (f.FriendTwoUid == userId && f.FriendOneUid == friendUid)
             );
-            //TODO: modify return to inform client if friendPair doesn't exist
             if (friendPair != null)
             {
                 _dataContext.Entry(friendPair).State = EntityState.Deleted;
                 await _dataContext.SaveChangesAsync();
-                return true;
+                return new BaseResponse<bool> { Data = true };
             }
-            return false;
+
+            return new BaseResponse<bool> { 
+                Error = new Error { Message = "Users are not friends"} 
+            };
+
 
         }
     }

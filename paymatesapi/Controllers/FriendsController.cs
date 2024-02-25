@@ -1,11 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using paymatesapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using paymatesapi.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using paymatesapi.Helpers;
 using paymatesapi.Models;
 

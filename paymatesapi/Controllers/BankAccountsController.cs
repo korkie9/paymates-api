@@ -1,25 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using paymatesapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using paymatesapi.Services;
 using paymatesapi.Models;
+using paymatesapi.Entities;
 
 namespace paymatesapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BankAccountsController : ControllerBase
+    public class BankAccountsController() : ControllerBase
     {
 
-        public BankAccountsController()
-        {
-        }
-
         [HttpPost("add-bank-account"), Authorize]
-        public ActionResult AddBankAccount(BankAccountDto bankDto)
+        public ActionResult<BaseResponse<BankAccount>> AddBankAccount(BankAccountDto bankDto)
         {
+            
             return Ok(bankDto);
         }
 

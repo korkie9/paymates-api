@@ -2,7 +2,7 @@ namespace paymatesapi.Models
 {
     public class Error 
     {
-        public string message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class BaseResponse<T>

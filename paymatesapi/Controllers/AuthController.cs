@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using paymatesapi.Models;
 using paymatesapi.DTOs;
 using paymatesapi.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
 using paymatesapi.Entities;
 using paymatesapi.Helpers;
@@ -12,55 +10,53 @@ namespace paymatesapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(IUserAuthService userAuthService, IJwtUtils jwtUtils) : ControllerBase
     {
-        private readonly IUserAuthService _userAuthService;
-        private readonly IJwtUtils _jwtUtils;
-
-        public AuthController(IUserAuthService userAuthService, IJwtUtils jwtUtils)
-        {
-            _jwtUtils = jwtUtils;
-            _userAuthService = userAuthService;
-        }
+        private readonly IUserAuthService _userAuthService = userAuthService;
+        private readonly IJwtUtils _jwtUtils = jwtUtils;
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthenticationResponse>> Register(UserDTO request)
+        public async Task<ActionResult<BaseResponse<User>>> Register(UserDTO request)
         {
-            var response = await _userAuthService.registerUser(request); //returns null if user exists
-            if (response == null) return BadRequest(new { message = "Username or Email already exists" });
-            if (response.Email == null) return BadRequest(new { message = "Username or Email already exists" });
-            if (response.Username == null) return BadRequest(new { message = "Username or Email already exists" });
-            if (response.Uid == null) return BadRequest(new { message = "Username or Email already exists" });
+            var response = await _userAuthService.RegisterUser(request); //returns null if user exists
+            if (response.Error != null) return BadRequest(response);
             return Ok(response);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AuthenticationResponse>> Login(UserCreds creds)
+        public async Task<ActionResult<BaseResponse<User>>> Login(UserCreds creds)
         {
-            var response = await _userAuthService.loginUser(creds);
-            if (response.Uid == null) return BadRequest(new { message = "Username or Password is incorrect" });
+            var response = await _userAuthService.LoginUser(creds);
+            if (response.Error != null) return BadRequest(
+                new BaseResponse<User> { 
+                    Error = new Error { Message = response.Error.Message } 
+                }
+            );
             return Ok(response);
         }
 
         [HttpPost("refresh-token")]
         public ActionResult<string> RefreshToken(RefreshTokenRequest requestBody)
         {
-            AuthenticationResponse user = _userAuthService.getUser(requestBody.Uid);
-            if (user == null) return BadRequest("User does not exist");
-            if (user.Uid == null) return BadRequest("User does not exist");
-            if (user.RefreshToken == null) return BadRequest(new { message = "Invalid Refresh token" });
-            if (!user.RefreshToken.Equals(requestBody.RefreshToken))
+            BaseResponse<User> user = _userAuthService.GetUser(requestBody.Uid);
+            if (user.Error != null) return BadRequest(user);
+            if(user.Data == null) return BadRequest(user);
+            if (!user.Data.RefreshToken.Equals(requestBody.RefreshToken))
             {
-                return Unauthorized(new { message = "Invalid Refresh Token." });
+                return Unauthorized(new BaseResponse<User> { 
+                    Error = new Error { Message = "Authenication Token is invalid" }
+                });
             }
-            else if (user?.RefreshTokenExpiry <  DateTime.Now.ToFileTimeUtc())
+            else if (user.Data.RefreshTokenExpiry <  DateTime.Now.ToFileTimeUtc())
             {
-                return Unauthorized(new { message = "Session has expired." });
+                return Unauthorized(new BaseResponse<User> { 
+                    Error = new Error { Message = "Session has expired" }
+                });
             }
 
-            var token = _jwtUtils.GenerateJwtToken(user);
-            if (token == "error") return BadRequest(new { message = "There was an issue generating your refresh token" });
-            return Ok(token);
+            var token = _jwtUtils.GenerateJwtToken(user.Data);
+            var res = new BaseResponse<string> { Data = token };
+            return Ok(res);
         }
 
         [HttpGet("test"), Authorize]

@@ -5,10 +5,11 @@ namespace paymatesapi.Services
 {
     public interface IFriendService
     {
-        Task<string> addFriend(string userUid, string friendUid);
-        Task<bool> deleteFriend(string userId, string friendUid);
+        Task<BaseResponse<string>> AddFriend(string userUid, string friendUid);
 
-        List<UserResponse> GetFriendsOfUser(string userId);
+        Task<BaseResponse<bool>> DeleteFriend(string userId, string friendUid);
+
+        BaseResponse<List<UserResponse>> GetFriendsOfUser(string userId);
 
     }
 }

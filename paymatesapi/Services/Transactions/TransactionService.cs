@@ -8,16 +8,12 @@ using paymatesapi.Models;
 
 namespace paymatesapi.Services
 {
-    public class TransactionService : ITransactionService
+    public class TransactionService(DataContext dataContext) : ITransactionService
     {
 
-        private readonly DataContext _dataContext;
-        public TransactionService(DataContext dataContext)
-        {
-            _dataContext = dataContext;
-        }
+        private readonly DataContext _dataContext = dataContext;
 
-        public async Task<BaseResponse<Transaction>> createTransaction(TransactionDTO transactionDTO)
+        public async Task<BaseResponse<Transaction>> CreateTransaction(TransactionDTO transactionDTO)
         {
             var friend = _dataContext.Friends.FirstOrDefault(f =>
                 (f.FriendOneUid == transactionDTO.DebtorUid && f.FriendTwoUid == transactionDTO.CreditorUid) ||
@@ -27,7 +23,7 @@ namespace paymatesapi.Services
             if (friend != null)
             {
                 Guid guid = Guid.NewGuid();
-                Transaction newTransaction = new Transaction
+                Transaction newTransaction = new()
                 {
                     Uid = guid.ToString(),
                     Icon = transactionDTO.Icon ?? null,
@@ -47,39 +43,48 @@ namespace paymatesapi.Services
                 catch (IOException e)
                 {
                     Console.WriteLine($"Returned with error: '{e}'");
-                    return new BaseResponse<Transaction> { Error = new Error { message = "Interal Server Error" } };
+                    return new BaseResponse<Transaction> { Error = new Error { Message = "Interal Server Error" } };
                 }
                 return new BaseResponse<Transaction>{ Data = newTransaction };
             }
 
-            return new BaseResponse<Transaction> { Error = new Error { message = "Friend pair not found" } };
+            return new BaseResponse<Transaction> { Error = new Error { Message = "Friend pair not found" } };
 
         }
 
-        public ICollection<Transaction> getTransactions(string userUid, string friendUid)
+        public BaseResponse<ICollection<Transaction>> GetTransactions(string userUid, string friendUid)
         {
             var friend = _dataContext.Friends
             .Include(f => f.Transactions)
             .FirstOrDefault(f => (f.FriendOneUid == userUid && f.FriendTwoUid == friendUid) || (f.FriendTwoUid == userUid && f.FriendOneUid == friendUid));
-            return friend?.Transactions ?? new List<Transaction>();
+            var res = friend?.Transactions ?? [];
+            return new BaseResponse<ICollection<Transaction>> { Data = res};
+
         }
 
-        public Transaction? getTransaction(string transactionUid)
+        public BaseResponse<Transaction>? GetTransaction(string transactionUid)
         {
             var dbTransaction = _dataContext.Transactions.Find(transactionUid);
-            return dbTransaction ?? null;
+            if(dbTransaction != null) return new BaseResponse<Transaction> {
+                Data = dbTransaction
+            };
+            return new BaseResponse<Transaction> {
+                Error = new Error { Message = "Transaction does not exist" }
+            };
         }
 
-        public async Task<bool> deleteTransaction(string transactionUid)
+        public async Task<BaseResponse<bool>> DeleteTransaction(string transactionUid)
         {
             var transaction = _dataContext.Transactions.Find(transactionUid);
             if (transaction != null)
             {
                 _dataContext.Entry(transaction).State = EntityState.Deleted;
                 await _dataContext.SaveChangesAsync();
-                return true;
+                return new BaseResponse<bool> { Data = true };
             }
-            return false;
+            return new BaseResponse<bool> {
+                Error = new Error { Message = "Transaction does not exist"}
+            };
 
         }
 

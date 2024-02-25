@@ -1,49 +1,31 @@
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using paymatesapi.Entities;
 using System.Security.Cryptography;
-using paymatesapi.Models;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace paymatesapi.Helpers
 {
     public interface IJwtUtils
     {
-        public string GenerateJwtToken(AuthenticationResponse user);
+        public string GenerateJwtToken(User user);
+
         public string GenerateRefreshToken();
+
         public List<Claim> GetClaimsFromHeaderToken();
-        // public int? ValidateJwtToken(string? token);
 
         public string GetUidFromHeaders();
     }
 
-    public class JwtUtils : IJwtUtils
+    public class JwtUtils(IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : IJwtUtils
     {
-        private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        // private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration = configuration;
 
-        public JwtUtils(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
+        public string GenerateJwtToken(User user)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _configuration = configuration;
-        }
-
-        public string GenerateJwtToken(AuthenticationResponse user)
-        {
-            if (user == null) return "error";
-            if (user?.Uid == null) return "error";
-            if (user?.FirstName == null) return "error";
-            if (user?.LastName == null) return "error";
-            if (user?.Username == null) return "error";
-            if (user?.Email == null) return "error";
-            if (user?.Uid == null) return "error";
-
             // generate token that is valid for 5 minutes
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt:Token").Value!);

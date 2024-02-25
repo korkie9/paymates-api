@@ -12,7 +12,7 @@ namespace paymatesapi.Services
 
         Task<BaseResponse<bool>> DeleteBankAccount(string bankAccountId);
 
-        BaseResponse<List<BankAccount>> GetBankAccounts(string userId);
+        Task<BaseResponse<List<BankAccount>>> GetBankAccounts(string userId);
 
     }
 }

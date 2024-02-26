@@ -47,7 +47,7 @@ namespace paymatesapi.Services
             return new BaseResponse<bool>
             {
                 Data = false,
-                Error = new Error { Message = "Bank Account dpes not exist" }
+                Error = new Error { Message = "Bank Account does not exist" }
             };
         }
 

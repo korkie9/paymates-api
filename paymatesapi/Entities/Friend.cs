@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 
@@ -14,6 +12,6 @@ namespace paymatesapi.Entities
         public required string FriendTwoUid { get; set; }
 
         [JsonIgnore]
-        public ICollection<Transaction> Transactions { get; } = new List<Transaction>();
+        public ICollection<Transaction> Transactions { get; } = [];
     }
 }

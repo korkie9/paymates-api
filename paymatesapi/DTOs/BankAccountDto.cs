@@ -1,7 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-
 namespace paymatesapi.DTOs
 {
 

@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace paymatesapi.Contexts
 {
-    public class DataContext : DbContext
+    public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options)
-        {
-        }
-
         public DbSet<User> Users { get; set; }
         public DbSet<Friend> Friends { get; set; }
         public DbSet<Transaction> Transactions { get; set; }

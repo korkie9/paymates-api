@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using paymatesapi.Entities;
 namespace paymatesapi.DTOs
 {
     public class TransactionDTO

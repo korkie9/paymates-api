@@ -22,11 +22,5 @@ namespace paymatesapi.Controllers
             }
             return Ok(response);
         }
-
-        [HttpGet("test"), Authorize]
-        public ActionResult<string> Test()
-        {
-            return Ok("hello world");
-        }
     }
 }

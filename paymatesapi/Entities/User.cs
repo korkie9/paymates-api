@@ -28,7 +28,7 @@ namespace paymatesapi.Entities
         public required long RefreshTokenExpiry { get; set; }
 
         [JsonIgnore]
-        public ICollection<BankAccount> BankAccounts { get; } = new List<BankAccount>();
+        public ICollection<BankAccount> BankAccounts { get; } = [];
 
     }
 }

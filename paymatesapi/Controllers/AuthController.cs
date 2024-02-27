@@ -35,7 +35,7 @@ namespace paymatesapi.Controllers
             return Ok(response);
         }
 
-        [HttpPost("refresh-token")]
+        [HttpPost("access-token")]
         public ActionResult<string> RefreshToken(RefreshTokenRequest requestBody)
         {
             BaseResponse<User> user = _userAuthService.GetUser(requestBody.Uid);

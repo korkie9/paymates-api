@@ -1,13 +1,7 @@
 using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using paymatesapi.Contexts;
-using paymatesapi.Entities;
 using paymatesapi.Helpers;
 using paymatesapi.Services;
 
@@ -34,6 +28,9 @@ using paymatesapi.Services;
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
+        builder.Services.AddScoped<IBankAccountService, BankAccountService>();
+
 
         builder
             .Services.AddAuthentication(

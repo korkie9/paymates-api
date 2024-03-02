@@ -1,6 +1,4 @@
 using MailKit.Net.Smtp;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using MimeKit;
 using MimeKit.Text;
 using paymatesapi.Models;
@@ -20,6 +18,8 @@ namespace paymatesapi.Services
             message.Subject = email.Subject;
             message.Body = new TextPart(TextFormat.Html) { Text = email.Body };
 
+
+
             using (var client = new SmtpClient())
             {
                 string host = _configuration.GetSection("Email:Host").Value!;
@@ -31,7 +31,7 @@ namespace paymatesapi.Services
 
                 client.Connect(host, port, false);
                 client.Authenticate(fromEmail, fromEmailPassword);
-                client.Send(message);
+                var result = client.Send(message);
                 client.Disconnect(true);
             }
             return email;

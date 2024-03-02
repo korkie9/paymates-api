@@ -16,9 +16,17 @@ namespace paymatesapi.Controllers
         private readonly IJwtUtils _jwtUtils = jwtUtils;
 
         [HttpPost("register")]
-        public async Task<ActionResult<BaseResponse<User>>> Register(UserDTO request)
+        public ActionResult<BaseResponse<User>> Register(UserDTO request)
         {
-            var response = await _userAuthService.RegisterUser(request); //returns null if user exists
+            var response = _userAuthService.RegisterUser(request);
+            if (response.Error != null) return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPost("create-user")]
+        public async Task<ActionResult<BaseResponse<User>>> CreateUser(CreateUserDto userdto)
+        {
+            var response = await _userAuthService.CreateUser(userdto.Token);
             if (response.Error != null) return BadRequest(response);
             return Ok(response);
         }
@@ -58,7 +66,7 @@ namespace paymatesapi.Controllers
                 });
             }
 
-            var token = _jwtUtils.GenerateJwtToken(user.Data);
+            var token = _jwtUtils.GenerateJwtToken(user.Data, 5);
             var res = new BaseResponse<string> { Data = token };
             return Ok(res);
         }
@@ -67,7 +75,7 @@ namespace paymatesapi.Controllers
         public async Task<ActionResult<BaseResponse<User>>> RotateToken(RefreshTokenRequest requestBody)
         {
             var res = await _userAuthService.UpdateRefreshToken(requestBody);
-            if(res.Error != null) return BadRequest(res);
+            if (res.Error != null) return BadRequest(res);
             return Ok(res);
         }
 

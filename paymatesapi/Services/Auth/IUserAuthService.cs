@@ -8,7 +8,9 @@ namespace paymatesapi.Services
     {
         BaseResponse<User> GetUser(string id);
 
-        Task<BaseResponse<User>> RegisterUser(UserDTO user);
+        BaseResponse<User> RegisterUser(UserDTO user);
+
+        Task<BaseResponse<User>> CreateUser(string token);
 
         Task<BaseResponse<User>> LoginUser(UserCreds user);
 

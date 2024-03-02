@@ -28,6 +28,8 @@ namespace paymatesapi.Entities
 
         public required long RefreshTokenExpiry { get; set; }
 
+        public bool? Verified { get; set; }
+
         [JsonIgnore]
         public ICollection<BankAccount> BankAccounts { get; } = [];
 

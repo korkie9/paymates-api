@@ -3,15 +3,19 @@ using paymatesapi.Contexts;
 using paymatesapi.Helpers;
 using paymatesapi.Entities;
 using paymatesapi.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace paymatesapi.Services
 {
-    public class UserAuthService(DataContext dataContext, IJwtUtils jwtUtils) : IUserAuthService
+    public class UserAuthService(DataContext dataContext, IJwtUtils jwtUtils, IEmailService emailService, IConfiguration configuration) : IUserAuthService
     {
         private readonly DataContext _dataContext = dataContext;
 
+        private readonly IEmailService _emailService = emailService;
+
         private readonly IJwtUtils _jwtUitls = jwtUtils;
+        private readonly IConfiguration _configuration = configuration;
+
 
         public BaseResponse<User> GetUser(string id)
         {
@@ -22,7 +26,7 @@ namespace paymatesapi.Services
             }
             return new BaseResponse<User> { Data = dbUser };
         }
-        public async Task<BaseResponse<User>> RegisterUser(UserDTO user)
+        public BaseResponse<User> RegisterUser(UserDTO user)
         {
             var dbUser = _dataContext.Users.Any(u => u.Username == user.Username || u.Email == user.Email);
             if (dbUser == true) return new BaseResponse<User> { Error = new Error { Message = "User already exists" } };
@@ -39,11 +43,18 @@ namespace paymatesapi.Services
                 PhotoUrl = user.PhotoUrl ?? null,
                 Password = passwordHash,
                 RefreshToken = newRefreshToken,
-                RefreshTokenExpiry = DateTime.Now.AddMinutes(1).ToFileTimeUtc() // TODO: Change back to day
+                RefreshTokenExpiry = DateTime.Now.AddDays(1).ToFileTimeUtc()
             };
-            _dataContext.Add(newUser);
-            await _dataContext.SaveChangesAsync();
-
+            var token = _jwtUitls.GenerateJwtToken(newUser, 60);
+            var frontendUrl = _configuration.GetSection("Urls:FrontendUrl").Value! + "?token=";
+            var email = new EmailBody
+            {
+                Body = "Hi there, thank you for signing up with Pyamates. Please click the url in this email to verify your account. If you did not create an account with us, please ignore this email. " + frontendUrl + token,
+                From = _configuration.GetSection("Email:FromEmail").Value!,
+                Subject = "Verify Account",
+                To = user.Email
+            };
+            _emailService.SendEmail(email);
 
             return new BaseResponse<User> { Data = newUser };
         }
@@ -108,5 +119,38 @@ namespace paymatesapi.Services
             return new BaseResponse<string> { Data = newRefreshToken };
         }
 
+        public async Task<BaseResponse<User>> CreateUser(string token)
+        {
+            List<Claim> userClaim = _jwtUitls.GetClaimsFromToken(token);
+            if (userClaim.ToList().Count == 0) return new BaseResponse<User> { Error = new Error { Message = "Token is invalid" } };
+
+            string uid = userClaim?.FirstOrDefault(c => c.Type == "Uid")?.Value!;
+            string email = userClaim?.FirstOrDefault(c => c.Type == "Email")?.Value!;
+            string? photoUrl = userClaim?.FirstOrDefault(c => c.Type == "PhotoUrl")?.Value;
+            string username = userClaim?.FirstOrDefault(c => c.Type == "Username")?.Value!;
+            string firstName = userClaim?.FirstOrDefault(c => c.Type == "FirstName")?.Value!;
+            string lastName = userClaim?.FirstOrDefault(c => c.Type == "LastName")?.Value!;
+            string password = userClaim?.FirstOrDefault(c => c.Type == "Password")?.Value!;
+            string refreshToken = userClaim?.FirstOrDefault(c => c.Type == "RefreshToken")?.Value!;
+            long refreshTokenExpiry = Convert.ToInt64(userClaim?.FirstOrDefault(c => c.Type == "RefreshTokenExpiry")?.Value);
+
+            var user = new User
+            {
+                Uid = uid,
+                Email = email,
+                PhotoUrl = photoUrl,
+                Username = username,
+                FirstName = firstName,
+                LastName = lastName,
+                Password = password,
+                RefreshToken = refreshToken,
+                RefreshTokenExpiry = refreshTokenExpiry,
+                Verified = true
+            };
+
+            _dataContext.Add(user);
+            await _dataContext.SaveChangesAsync();
+            return new BaseResponse<User> { Data = user };
+        }
     }
 }

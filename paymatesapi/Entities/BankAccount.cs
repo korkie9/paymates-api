@@ -1,7 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-using paymatesapi.Entities;
 
 namespace paymatesapi.Entities
 {

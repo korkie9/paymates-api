@@ -22,7 +22,7 @@ namespace paymatesapi.Migrations
             modelBuilder.Entity("paymatesapi.Entities.BankAccount", b =>
                 {
                     b.Property<string>("BankAccountUid")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("AccountNumber")
                         .IsRequired()
@@ -42,7 +42,7 @@ namespace paymatesapi.Migrations
 
                     b.Property<string>("UserUid")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("BankAccountUid");
 
@@ -73,13 +73,13 @@ namespace paymatesapi.Migrations
             modelBuilder.Entity("paymatesapi.Entities.Transaction", b =>
                 {
                     b.Property<string>("Uid")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreditorUid")
                         .IsRequired()
@@ -109,7 +109,7 @@ namespace paymatesapi.Migrations
             modelBuilder.Entity("paymatesapi.Entities.User", b =>
                 {
                     b.Property<string>("Uid")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -143,6 +143,9 @@ namespace paymatesapi.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<bool?>("Verified")
+                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Uid");
 

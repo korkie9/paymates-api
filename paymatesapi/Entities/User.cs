@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using paymatesapi.Models;
 
 namespace paymatesapi.Entities
 {
@@ -27,8 +28,14 @@ namespace paymatesapi.Entities
 
         public required long RefreshTokenExpiry { get; set; }
 
-        [JsonIgnore]
-        public ICollection<BankAccount> BankAccounts { get; } = new List<BankAccount>();
+        public bool? Verified { get; set; }
 
+        [JsonIgnore]
+        public ICollection<BankAccount> BankAccounts { get; } = [];
+
+        public static implicit operator User(BaseResponse<User> v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

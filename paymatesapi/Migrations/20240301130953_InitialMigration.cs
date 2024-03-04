@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace paymatesapi.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial_Migrate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,7 +36,7 @@ namespace paymatesapi.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Uid = table.Column<string>(type: "varchar(95)", nullable: false)
+                    Uid = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -52,7 +52,8 @@ namespace paymatesapi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RefreshToken = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    RefreshTokenExpiry = table.Column<long>(type: "bigint", nullable: false)
+                    RefreshTokenExpiry = table.Column<long>(type: "bigint", nullable: false),
+                    Verified = table.Column<bool>(type: "tinyint(1)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -64,7 +65,7 @@ namespace paymatesapi.Migrations
                 name: "Transactions",
                 columns: table => new
                 {
-                    Uid = table.Column<string>(type: "varchar(95)", nullable: false)
+                    Uid = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Icon = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -75,7 +76,7 @@ namespace paymatesapi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreditorUid = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     FriendId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -94,7 +95,7 @@ namespace paymatesapi.Migrations
                 name: "BankAccounts",
                 columns: table => new
                 {
-                    BankAccountUid = table.Column<string>(type: "varchar(95)", nullable: false)
+                    BankAccountUid = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Bank = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -104,7 +105,7 @@ namespace paymatesapi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     BranchCode = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserUid = table.Column<string>(type: "varchar(95)", nullable: false)
+                    UserUid = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>

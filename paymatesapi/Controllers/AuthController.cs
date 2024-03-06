@@ -5,6 +5,7 @@ using paymatesapi.Services;
 using Microsoft.AspNetCore.Authorization;
 using paymatesapi.Entities;
 using paymatesapi.Helpers;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace paymatesapi.Controllers
 {
@@ -19,7 +20,7 @@ namespace paymatesapi.Controllers
         public ActionResult<BaseResponse<User>> Register(UserDTO request)
         {
             var response = _userAuthService.RegisterUser(request);
-            if (response.Error != null) return BadRequest(response);
+            // if (response.Error != null) return Ok(response);
             return Ok(response);
         }
 

@@ -46,7 +46,7 @@ namespace paymatesapi.Services
                 RefreshTokenExpiry = DateTime.Now.AddDays(1).ToFileTimeUtc()
             };
             var token = _jwtUitls.GenerateJwtToken(newUser, 60);
-            var frontendUrl = _configuration.GetSection("Urls:FrontendUrl").Value! + "?token=";
+            var frontendUrl = _configuration.GetSection("Urls:FrontendUrl").Value! + "/confirm-account/";
             var email = new EmailBody
             {
                 Body = "Hi there, thank you for signing up with Pyamates. Please click the url in this email to verify your account. If you did not create an account with us, please ignore this email. " + frontendUrl + token,
@@ -147,7 +147,11 @@ namespace paymatesapi.Services
                 RefreshTokenExpiry = refreshTokenExpiry,
                 Verified = true
             };
-
+            if (_dataContext.Users.Find(user.Uid) != null)
+                return new BaseResponse<User>
+                {
+                    Error = new Error { Message = "User has already been created" }
+                };
             _dataContext.Add(user);
             await _dataContext.SaveChangesAsync();
             return new BaseResponse<User> { Data = user };

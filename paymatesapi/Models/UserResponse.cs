@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-
 namespace paymatesapi.Models
 {
     public class UserResponse
@@ -15,3 +12,4 @@ namespace paymatesapi.Models
         public required string LastName { get; set; }
     }
 }
+

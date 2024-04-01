@@ -11,6 +11,7 @@ namespace paymatesapi.Entities
 
         [EmailAddress(ErrorMessage = "Valid Email is required")]
         public required string Email { get; set; }
+
         public string? PhotoUrl { get; set; }
 
         [StringLength(100)]
@@ -24,9 +25,9 @@ namespace paymatesapi.Entities
 
         public required string Password { get; set; }
 
-        public required string RefreshToken { get; set; }
+        public string? RefreshToken { get; set; }
 
-        public required long RefreshTokenExpiry { get; set; }
+        public long? RefreshTokenExpiry { get; set; }
 
         public bool? Verified { get; set; }
 
@@ -39,3 +40,4 @@ namespace paymatesapi.Entities
         }
     }
 }
+

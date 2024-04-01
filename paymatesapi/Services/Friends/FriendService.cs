@@ -9,10 +9,10 @@ namespace paymatesapi.Services
     {
         private readonly DataContext _dataContext = dataContext;
 
-        public async Task<BaseResponse<string>> AddFriend(string userEmail, string friendEmail)
+        public async Task<BaseResponse<string>> AddFriend(string username, string friendUsername)
         {
-            bool friendPair_1 = _dataContext.Friends.Any(f =>
-                f.FriendOneEmail == userEmail && f.FriendTwoEmail == friendEmail
+            bool friendPair_1 = await _dataContext.Friends.AnyAsync(f =>
+                f.FriendOneUsername == username && f.FriendTwoUsername == friendUsername
             );
             if (friendPair_1)
             {
@@ -21,8 +21,8 @@ namespace paymatesapi.Services
                     Error = new Error { Message = "Users are already friends" }
                 };
             }
-            bool friendPair_2 = _dataContext.Friends.Any(f =>
-                f.FriendOneEmail == friendEmail && f.FriendTwoEmail == userEmail
+            bool friendPair_2 = await _dataContext.Friends.AnyAsync(f =>
+                f.FriendOneUsername == friendUsername && f.FriendTwoUsername == username
             );
             if (friendPair_2)
             {
@@ -31,48 +31,81 @@ namespace paymatesapi.Services
                     Error = new Error { Message = "Users are already friends" }
                 };
             }
-            bool userOneExists = _dataContext.Users.Any(f => f.Email == userEmail);
-            bool userTwoExists = _dataContext.Users.Any(f => f.Email == friendEmail);
-            if (!userOneExists || !userTwoExists)
+            var userOne = await _dataContext.Users.FirstOrDefaultAsync(f => f.Username == username);
+            var userTwo = await _dataContext.Users.FirstOrDefaultAsync(f =>
+                f.Username == friendUsername
+            );
+            if (userOne == null || userTwo == null)
             {
+                Console.WriteLine(username);
+                Console.WriteLine(friendUsername);
                 return new BaseResponse<string>
                 {
                     Error = new Error { Message = "Users not found" }
                 };
             }
-            Friend newFriend = new() { FriendOneEmail = userEmail, FriendTwoEmail = friendEmail };
+            Friend newFriend =
+                new() { FriendOneUsername = username, FriendTwoUsername = friendUsername };
             _dataContext.Add(newFriend);
             await _dataContext.SaveChangesAsync();
             return new BaseResponse<string> { Data = "Friend added" };
         }
 
-        public BaseResponse<List<UserResponse>> GetFriendsOfUser(string userId)
+        public BaseResponse<List<UserWithLastTransaction>> GetFriendsOfUser(string username)
         {
-            var userFriends = _dataContext
-                .Users.FromSqlInterpolated(
-                    $@"SELECT U2.Uid, U2.PhotoUrl, U2.FirstName, U2.LastName, U2.Username
-                            FROM Users AS U1
-                            INNER JOIN Friends AS F ON U1.Uid = F.FriendOneUid
-                            INNER JOIN Users AS U2 ON U2.Uid = F.FriendTwoUid
-                            WHERE U1.Uid = '{userId}'"
+            var friendUsernames = _dataContext
+                .Friends.Where(f =>
+                    f.FriendOneUsername == username || f.FriendTwoUsername == username
                 )
-                .Select(u => new UserResponse
+                .Select(f =>
+                    f.FriendOneUsername == username ? f.FriendTwoUsername : f.FriendOneUsername
+                )
+                .Distinct()
+                .ToList();
+
+            var friendsData = _dataContext
+                .Users.Where(u => friendUsernames.Contains(u.Username))
+                .ToList();
+
+            var userTransactions = _dataContext
+                .Transactions.Where(t =>
+                    t.CreditorUsername == username || t.DebtorUsername == username
+                )
+                .GroupBy(t =>
+                    t.CreditorUsername == username ? t.DebtorUsername : t.CreditorUsername
+                )
+                .Select(g => new
                 {
-                    Uid = u.Uid,
-                    PhotoUrl = u.PhotoUrl,
-                    Username = u.Username,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName
+                    Username = g.Key,
+                    LastTransaction = g.OrderByDescending(t => t.CreatedAt).FirstOrDefault()
                 })
                 .ToList();
-            return new BaseResponse<List<UserResponse>> { Data = userFriends };
+
+            var result = friendsData
+                .Select(u => new UserWithLastTransaction
+                {
+                    User = new UserFriendResponse
+                    {
+                        Email = u.Email,
+                        PhotoUrl = u.PhotoUrl,
+                        Username = u.Username,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName
+                    },
+                    LastTransaction = userTransactions
+                        .FirstOrDefault(t => t.Username == u.Username)
+                        ?.LastTransaction
+                })
+                .ToList();
+
+            return new BaseResponse<List<UserWithLastTransaction>> { Data = result };
         }
 
-        public async Task<BaseResponse<bool>> DeleteFriend(string userEmail, string friendEmail)
+        public async Task<BaseResponse<bool>> DeleteFriend(string username, string friendUsername)
         {
             var friendPair = _dataContext.Friends.FirstOrDefault(f =>
-                (f.FriendOneEmail == userEmail && f.FriendTwoEmail == friendEmail)
-                || (f.FriendTwoEmail == userEmail && f.FriendOneEmail == friendEmail)
+                (f.FriendOneUsername == username && f.FriendTwoUsername == friendUsername)
+                || (f.FriendTwoUsername == username && f.FriendOneUsername == friendUsername)
             );
             if (friendPair != null)
             {

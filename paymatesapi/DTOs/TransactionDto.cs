@@ -7,9 +7,9 @@ namespace paymatesapi.DTOs
 
         public required decimal Amount { get; set; }
 
-        public required string DebtorUid { get; set; }
+        public required string DebtorUsername { get; set; }
 
-        public required string CreditorUid { get; set; }
-
+        public required string CreditorUsername { get; set; }
     }
 }
+

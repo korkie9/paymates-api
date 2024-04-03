@@ -51,7 +51,9 @@ namespace paymatesapi.Services
             return new BaseResponse<string> { Data = "Friend added" };
         }
 
-        public BaseResponse<List<UserWithLastTransaction>> GetFriendsOfUser(string username)
+        public BaseResponse<List<UserWithLastTransaction>> GetFriendsWithTransactionsOfUser(
+            string username
+        )
         {
             var friendUsernames = _dataContext
                 .Friends.Where(f =>
@@ -99,6 +101,24 @@ namespace paymatesapi.Services
                 .ToList();
 
             return new BaseResponse<List<UserWithLastTransaction>> { Data = result };
+        }
+
+        public BaseResponse<List<string>> GetFriendsOfUser(string username)
+        {
+            var friends = _dataContext
+                .Friends.Where(f =>
+                    f.FriendOneUsername == username || f.FriendTwoUsername == username
+                )
+                .ToList()
+                .Select(f =>
+                {
+                    return f.FriendOneUsername == username
+                        ? f.FriendOneUsername
+                        : f.FriendTwoUsername;
+                })
+                .ToList();
+
+            return new BaseResponse<List<string>> { Data = friends };
         }
 
         public async Task<BaseResponse<bool>> DeleteFriend(string username, string friendUsername)

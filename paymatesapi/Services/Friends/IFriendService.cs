@@ -9,7 +9,11 @@ namespace paymatesapi.Services
 
         Task<BaseResponse<bool>> DeleteFriend(string username, string friendUsername);
 
-        BaseResponse<List<UserWithLastTransaction>> GetFriendsOfUser(string username);
+        BaseResponse<List<UserWithLastTransaction>> GetFriendsWithTransactionsOfUser(
+            string username
+        );
+
+        BaseResponse<List<string>> GetFriendsOfUser(string username);
 
         BaseResponse<List<User>> FindFriendByUsername(string username);
     }

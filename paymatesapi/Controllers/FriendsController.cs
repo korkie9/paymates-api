@@ -55,10 +55,17 @@ namespace paymatesapi.Controllers
                 );
         }
 
+        [HttpPost("get-friends-with-transactions"), Authorize]
+        public ActionResult<
+            BaseResponse<List<UserWithLastTransaction>>
+        > GetUserFriendsWithTransactions(GetFriendsRequest req)
+        {
+            var friends = _friendService.GetFriendsWithTransactionsOfUser(req.Username);
+            return Ok(friends);
+        }
+
         [HttpPost("get-friends"), Authorize]
-        public ActionResult<BaseResponse<List<UserWithLastTransaction>>> GetUserFriends(
-            GetFriendsRequest req
-        )
+        public ActionResult<BaseResponse<List<string>>> GetUserFriends(GetFriendsRequest req)
         {
             var friends = _friendService.GetFriendsOfUser(req.Username);
             return Ok(friends);

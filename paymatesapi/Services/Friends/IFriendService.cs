@@ -1,4 +1,3 @@
-using paymatesapi.Entities;
 using paymatesapi.Models;
 
 namespace paymatesapi.Services
@@ -15,6 +14,6 @@ namespace paymatesapi.Services
 
         BaseResponse<List<string>> GetFriendsOfUser(string username);
 
-        BaseResponse<List<User>> FindFriendByUsername(string username);
+        Task<BaseResponse<UserFriendResponse>> FindFriendByUsername(string username);
     }
 }

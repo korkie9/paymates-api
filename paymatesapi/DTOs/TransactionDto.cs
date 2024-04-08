@@ -12,4 +12,3 @@ namespace paymatesapi.DTOs
         public required string CreditorUsername { get; set; }
     }
 }
-

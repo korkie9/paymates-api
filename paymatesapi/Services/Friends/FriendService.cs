@@ -140,15 +140,27 @@ namespace paymatesapi.Services
             };
         }
 
-        public BaseResponse<List<User>> FindFriendByUsername(string username)
+        public async Task<BaseResponse<UserFriendResponse>> FindFriendByUsername(string username)
         {
-            List<User> users =
-            [
-                .. _dataContext
-                    .Users.Select(user => user)
-                    .Where(user => user.Username.Contains(username))
-            ];
-            return new BaseResponse<List<User>> { Data = users };
+            var user = await _dataContext
+                .Users.Where(user => user.Username.Contains(username))
+                .FirstOrDefaultAsync();
+            if (user != null)
+            {
+                UserFriendResponse userFriendResponse = new UserFriendResponse
+                {
+                    Email = user.Email,
+                    PhotoUrl = user.PhotoUrl,
+                    Username = user.Username,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                };
+                return new BaseResponse<UserFriendResponse> { Data = userFriendResponse };
+            }
+            return new BaseResponse<UserFriendResponse>
+            {
+                Error = new Error { Message = "User not found" }
+            };
         }
     }
 }

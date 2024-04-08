@@ -72,9 +72,11 @@ namespace paymatesapi.Controllers
         }
 
         [HttpPost("find-friend"), Authorize]
-        public ActionResult<BaseResponse<string>> FindFriend(FindFriendRequest friendUsername)
+        public async Task<ActionResult<BaseResponse<UserFriendResponse>>> FindFriend(
+            FindFriendRequest friendUsername
+        )
         {
-            var user = _friendService.FindFriendByUsername(friendUsername.FriendUsername);
+            var user = await _friendService.FindFriendByUsername(friendUsername.FriendUsername);
 
             return user?.Error?.Message != null ? BadRequest(user) : Ok(user);
         }

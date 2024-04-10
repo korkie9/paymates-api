@@ -1,10 +1,11 @@
+using paymatesapi.Entities;
 using paymatesapi.Models;
 
 namespace paymatesapi.Services
 {
     public interface IFriendService
     {
-        Task<BaseResponse<string>> AddFriend(string username, string friendUsername);
+        Task<BaseResponse<Friend>> AddFriend(string username, string friendUsername);
 
         Task<BaseResponse<bool>> DeleteFriend(string username, string friendUsername);
 

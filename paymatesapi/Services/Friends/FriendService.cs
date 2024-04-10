@@ -9,14 +9,14 @@ namespace paymatesapi.Services
     {
         private readonly DataContext _dataContext = dataContext;
 
-        public async Task<BaseResponse<string>> AddFriend(string username, string friendUsername)
+        public async Task<BaseResponse<Friend>> AddFriend(string username, string friendUsername)
         {
             bool friendPair_1 = await _dataContext.Friends.AnyAsync(f =>
                 f.FriendOneUsername == username && f.FriendTwoUsername == friendUsername
             );
             if (friendPair_1)
             {
-                return new BaseResponse<string>
+                return new BaseResponse<Friend>
                 {
                     Error = new Error { Message = "Users are already friends" }
                 };
@@ -26,7 +26,7 @@ namespace paymatesapi.Services
             );
             if (friendPair_2)
             {
-                return new BaseResponse<string>
+                return new BaseResponse<Friend>
                 {
                     Error = new Error { Message = "Users are already friends" }
                 };
@@ -37,9 +37,7 @@ namespace paymatesapi.Services
             );
             if (userOne == null || userTwo == null)
             {
-                Console.WriteLine(username);
-                Console.WriteLine(friendUsername);
-                return new BaseResponse<string>
+                return new BaseResponse<Friend>
                 {
                     Error = new Error { Message = "Users not found" }
                 };
@@ -48,7 +46,7 @@ namespace paymatesapi.Services
                 new() { FriendOneUsername = username, FriendTwoUsername = friendUsername };
             _dataContext.Add(newFriend);
             await _dataContext.SaveChangesAsync();
-            return new BaseResponse<string> { Data = "Friend added" };
+            return new BaseResponse<Friend> { Data = newFriend };
         }
 
         public BaseResponse<List<UserWithLastTransaction>> GetFriendsWithTransactionsOfUser(

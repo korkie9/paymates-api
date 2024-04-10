@@ -19,6 +19,7 @@ namespace paymatesapi.Controllers
         [HttpPost("register")]
         public ActionResult<BaseResponse<User>> Register(UserDTO request)
         {
+            request.Username = request.Username.ToLower().Trim();
             var response = _userAuthService.RegisterUser(request);
             return Ok(response);
         }

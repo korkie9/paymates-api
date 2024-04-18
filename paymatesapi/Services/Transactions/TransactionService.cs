@@ -74,6 +74,7 @@ namespace paymatesapi.Services
                     || (f.FriendTwoUsername == username && f.FriendOneUsername == friendUsername)
                 );
             var res = friend?.Transactions ?? [];
+            Console.WriteLine(res.ToString());
             return new BaseResponse<ICollection<Transaction>> { Data = res };
         }
 

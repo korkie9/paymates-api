@@ -8,12 +8,13 @@ namespace paymatesapi.Services
     {
         Task<BaseResponse<Transaction>> CreateTransaction(TransactionDTO transactionDTO);
 
-        BaseResponse<ICollection<Transaction>>? GetTransactions(string userUid, string friendUid);
+        BaseResponse<ICollection<Transaction>> GetTransactions(
+            string username,
+            string friendUsername
+        );
 
         BaseResponse<Transaction>? GetTransaction(string transactionUid);
 
         Task<BaseResponse<bool>> DeleteTransaction(string transactionUid);
-
-
     }
 }

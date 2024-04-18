@@ -54,15 +54,15 @@ namespace paymatesapi.Controllers
         }
 
         [HttpPost("get-transactions"), Authorize]
-        public ActionResult<ICollection<Transaction>> GetTransactions(string friendUid)
+        public ActionResult<BaseResponse<ICollection<Transaction>>> GetTransactions(
+            GetTransactionsRequest friendRequest
+        )
         {
-            string userId = _jwtUtils.GetUidFromHeaders();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new { message = "User is not authenticated" });
-            }
-
-            var transactions = _transactionService.GetTransactions(userId, friendUid);
+            BaseResponse<ICollection<Transaction>> transactions =
+                _transactionService.GetTransactions(
+                    friendRequest.Username,
+                    friendRequest.FriendUsername
+                );
             return transactions == null
                 ? NotFound(new { message = "Transactions not found" })
                 : Ok(transactions);
@@ -72,9 +72,9 @@ namespace paymatesapi.Controllers
         public ActionResult<Transaction> GetTransaction(TransactionRequest transactionRequest)
         {
             var transaction = _transactionService.GetTransaction(transactionRequest.TransactionUid);
-            if (transaction == null)
-                return NotFound(new { message = "Transaction not found" });
-            return Ok(transaction);
+            return transaction == null
+                ? NotFound(new { message = "Transaction not found" })
+                : Ok(transaction);
         }
 
         [HttpDelete("delete-transaction"), Authorize]

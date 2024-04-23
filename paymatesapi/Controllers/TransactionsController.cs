@@ -13,38 +13,38 @@ namespace paymatesapi.Controllers
     public class TransactionsController(ITransactionService transactionService, IJwtUtils jwtUtils)
         : ControllerBase
     {
-        private readonly IJwtUtils _jwtUtils = jwtUtils;
+        /* private readonly IJwtUtils _jwtUtils = jwtUtils; */
 
         private readonly ITransactionService _transactionService = transactionService;
 
         [HttpPost("create-transaction"), Authorize]
         public async Task<IActionResult> CreateTransaction(TransactionDTO transactionDTO)
         {
-            if (transactionDTO.DebtorUsername == null)
+            if (transactionDTO.DebtorUsernames == null)
             {
                 return BadRequest(
-                    new BaseResponse<Transaction>
+                    new BaseResponse<bool>
                     {
-                        Error = new Error { Message = "Debtor email is required" }
+                        Error = new Error { Message = "Debtor username is required" }
                     }
                 );
             }
-            if (transactionDTO.CreditorUsername == null)
+            if (transactionDTO.CreditorUsernames == null)
             {
                 return BadRequest(
-                    new BaseResponse<Transaction>
+                    new BaseResponse<bool>
                     {
-                        Error = new Error { Message = "Creditor email is required" }
+                        Error = new Error { Message = "Creditor username is required" }
                     }
                 );
             }
 
-            BaseResponse<Transaction> newTransaction = await _transactionService.CreateTransaction(
+            BaseResponse<bool> newTransaction = await _transactionService.CreateTransactions(
                 transactionDTO
             );
             if (newTransaction.Error != null)
             {
-                var errResponse = new BaseResponse<Transaction>
+                BaseResponse<bool> errResponse = new BaseResponse<bool>
                 {
                     Error = new Error { Message = newTransaction.Error.Message }
                 };

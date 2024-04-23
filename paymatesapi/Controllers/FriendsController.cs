@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using paymatesapi.DTOs;
+using paymatesapi.Entities;
 using paymatesapi.Helpers;
 using paymatesapi.Models;
 using paymatesapi.Services;
@@ -16,7 +17,7 @@ namespace paymatesapi.Controllers
         private readonly IJwtUtils _jwtUtils = jwtUtils;
 
         [HttpPost("add-friend"), Authorize]
-        public async Task<ActionResult<BaseResponse<string>>> AddFriend(
+        public async Task<ActionResult<BaseResponse<Friend>>> AddFriend(
             InviteFriendRequest inviteRequest
         )
         {

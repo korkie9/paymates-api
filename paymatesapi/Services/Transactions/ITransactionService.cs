@@ -6,7 +6,7 @@ namespace paymatesapi.Services
 {
     public interface ITransactionService
     {
-        Task<BaseResponse<Transaction>> CreateTransaction(TransactionDTO transactionDTO);
+        Task<BaseResponse<bool>> CreateTransactions(TransactionDTO transactionDTO);
 
         BaseResponse<ICollection<Transaction>> GetTransactions(
             string username,

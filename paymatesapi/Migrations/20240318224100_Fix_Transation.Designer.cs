@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using paymatesapi.Contexts;
 
@@ -10,9 +11,11 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240318224100_Fix_Transation")]
+    partial class Fix_Transation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,8 +81,8 @@ namespace paymatesapi.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<long>("CreatedAt")
-                        .HasColumnType("bigint");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreditorUsername")
                         .IsRequired()
@@ -133,9 +136,10 @@ namespace paymatesapi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("RefreshToken")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<long?>("RefreshTokenExpiry")
+                    b.Property<long>("RefreshTokenExpiry")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Username")

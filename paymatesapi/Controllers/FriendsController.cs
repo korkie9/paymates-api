@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using paymatesapi.DTOs;
+using paymatesapi.Entities;
 using paymatesapi.Helpers;
 using paymatesapi.Models;
 using paymatesapi.Services;
@@ -16,21 +17,14 @@ namespace paymatesapi.Controllers
         private readonly IJwtUtils _jwtUtils = jwtUtils;
 
         [HttpPost("add-friend"), Authorize]
-        public async Task<ActionResult<BaseResponse<string>>> AddFriend(
-            InviteFriendRequest friendEmail
+        public async Task<ActionResult<BaseResponse<Friend>>> AddFriend(
+            InviteFriendRequest inviteRequest
         )
         {
-            string userId = _jwtUtils.GetUidFromHeaders();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(
-                    new BaseResponse<string>
-                    {
-                        Error = new Error { Message = "User is not authenticated" }
-                    }
-                );
-            }
-            var user = await _friendService.AddFriend(userId, friendEmail.FriendEmail);
+            var user = await _friendService.AddFriend(
+                inviteRequest.Username,
+                inviteRequest.FriendUsername
+            );
             return user?.Error?.Message != null ? BadRequest(user) : Ok(user);
         }
 
@@ -62,30 +56,30 @@ namespace paymatesapi.Controllers
                 );
         }
 
-        [HttpGet("get-friends"), Authorize]
-        public ActionResult<BaseResponse<List<UserResponse>>> GetUserFriends()
+        [HttpPost("get-friends-with-transactions"), Authorize]
+        public ActionResult<
+            BaseResponse<List<UserWithLastTransaction>>
+        > GetUserFriendsWithTransactions(GetFriendsRequest req)
         {
-            string userId = _jwtUtils.GetUidFromHeaders();
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(
-                    new BaseResponse<string>
-                    {
-                        Error = new Error { Message = "User is not authenticated" }
-                    }
-                );
-            }
+            var friends = _friendService.GetFriendsWithTransactionsOfUser(req.Username);
+            return Ok(friends);
+        }
 
-            var friends = _friendService.GetFriendsOfUser(userId);
-            return friends.Error != null ? Ok(friends) : BadRequest(friends);
+        [HttpPost("get-friends"), Authorize]
+        public ActionResult<BaseResponse<List<string>>> GetUserFriends(GetFriendsRequest req)
+        {
+            var friends = _friendService.GetFriendsOfUser(req.Username);
+            return Ok(friends);
         }
 
         [HttpPost("find-friend"), Authorize]
-        public ActionResult<BaseResponse<string>> FindFriend(FindFriendRequest friendEmail)
+        public async Task<ActionResult<BaseResponse<UserFriendResponse>>> FindFriend(
+            FindFriendRequest friendUsername
+        )
         {
-            var user = _friendService.FindFriendByUsername(friendEmail.FriendEmail);
+            var user = await _friendService.FindFriendByUsername(friendUsername.FriendUsername);
 
-            return user?.Error?.Message != null ? Ok(user) : BadRequest(user);
+            return user?.Error?.Message != null ? BadRequest(user) : Ok(user);
         }
     }
 }

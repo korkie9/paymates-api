@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using paymatesapi.Entities;
 namespace paymatesapi.DTOs
 {
     public class TransactionDTO
@@ -9,9 +7,8 @@ namespace paymatesapi.DTOs
 
         public required decimal Amount { get; set; }
 
-        public required string DebtorUid { get; set; }
+        public required string[] DebtorUsernames { get; set; }
 
-        public required string CreditorUid { get; set; }
-
+        public required string[] CreditorUsernames { get; set; }
     }
 }

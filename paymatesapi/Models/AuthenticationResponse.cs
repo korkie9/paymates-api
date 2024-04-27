@@ -13,7 +13,7 @@ public class AuthenticationResponse
     public string? Email { get; set; }
     public string? PhotoUrl { get; set; }
     public string? RefreshToken { get; set; }
-    public DateTime? RefreshTokenExpiry { get; set; }
+    public long? RefreshTokenExpiry { get; set; }
 
 
     public AuthenticationResponse(User? user)

@@ -1,85 +1,164 @@
-using paymatesapi.Contexts;
-using paymatesapi.Models;
-using paymatesapi.Entities;
-using System;
 using Microsoft.EntityFrameworkCore;
-
+using paymatesapi.Contexts;
+using paymatesapi.Entities;
+using paymatesapi.Models;
 
 namespace paymatesapi.Services
 {
-    public class FriendService : IFriendService
-
+    public class FriendService(DataContext dataContext) : IFriendService
     {
+        private readonly DataContext _dataContext = dataContext;
 
-        private readonly DataContext _dataContext;
-        public FriendService(DataContext dataContext)
+        public async Task<BaseResponse<Friend>> AddFriend(string username, string friendUsername)
         {
-            _dataContext = dataContext;
-        }
-        public async Task<string> addFriend(string userUid, string friendUid) //TODO: check if user is trying to add themselves
-        {
-            var friendPair_1 = _dataContext.Friends.Any(f => f.FriendOneUid == userUid && f.FriendTwoUid == friendUid);
-            if (friendPair_1 != false) return "Users are already friends";
-            var friendPair_2 = _dataContext.Friends.Any(f => f.FriendOneUid == friendUid && f.FriendTwoUid == userUid);
-            if (friendPair_2 != false) return "Users are already friends";
-            var userOneExists = _dataContext.Users.Any(f => f.Uid == userUid);
-            var userTwoExists = _dataContext.Users.Any(f => f.Uid == friendUid);
-            if (!userOneExists || !userTwoExists) return "User not found";
-            Friend newFriend = new Friend
+            bool friendPair_1 = await _dataContext.Friends.AnyAsync(f =>
+                f.FriendOneUsername == username && f.FriendTwoUsername == friendUsername
+            );
+            if (friendPair_1)
             {
-                FriendOneUid = userUid,
-                FriendTwoUid = friendUid
-            };
+                return new BaseResponse<Friend>
+                {
+                    Error = new Error { Message = "Users are already friends" }
+                };
+            }
+            bool friendPair_2 = await _dataContext.Friends.AnyAsync(f =>
+                f.FriendOneUsername == friendUsername && f.FriendTwoUsername == username
+            );
+            if (friendPair_2)
+            {
+                return new BaseResponse<Friend>
+                {
+                    Error = new Error { Message = "Users are already friends" }
+                };
+            }
+            var userOne = await _dataContext.Users.FirstOrDefaultAsync(f => f.Username == username);
+            var userTwo = await _dataContext.Users.FirstOrDefaultAsync(f =>
+                f.Username == friendUsername
+            );
+            if (userOne == null || userTwo == null)
+            {
+                return new BaseResponse<Friend>
+                {
+                    Error = new Error { Message = "Users not found" }
+                };
+            }
+            Friend newFriend =
+                new() { FriendOneUsername = username, FriendTwoUsername = friendUsername };
             _dataContext.Add(newFriend);
             await _dataContext.SaveChangesAsync();
-            return "Friend Added";
+            return new BaseResponse<Friend> { Data = newFriend };
         }
 
-        // public List<Friend> GetFriends(string userId)
-        // {
-        //     var friends = _dataContext.Friends
-        //         .Where(f => f.FriendOneUid == userId || f.FriendTwoUid == userId)
-        //         .ToList();
-        //     return friends;
-        // }
-
-        public List<UserResponse> GetFriendsOfUser(string userId)
+        public BaseResponse<List<UserWithLastTransaction>> GetFriendsWithTransactionsOfUser(
+            string username
+        )
         {
-            var userFriends = _dataContext.Users
-                .FromSqlInterpolated(
-                            $@"SELECT U2.Uid, U2.PhotoUrl, U2.FirstName, U2.LastName, U2.Username
-                            FROM Users AS U1
-                            INNER JOIN Friends AS F ON U1.Uid = F.FriendOneUid
-                            INNER JOIN Users AS U2 ON U2.Uid = F.FriendTwoUid
-                            WHERE U1.Uid = {userId}"
-                            )
-                    .Select(u => new UserResponse
+            var friendUsernames = _dataContext
+                .Friends.Where(f =>
+                    f.FriendOneUsername == username || f.FriendTwoUsername == username
+                )
+                .Select(f =>
+                    f.FriendOneUsername == username ? f.FriendTwoUsername : f.FriendOneUsername
+                )
+                .Distinct()
+                .ToList();
+
+            var friendsData = _dataContext
+                .Users.Where(u => friendUsernames.Contains(u.Username))
+                .ToList();
+
+            var userTransactions = _dataContext
+                .Transactions.Where(t =>
+                    t.CreditorUsername == username || t.DebtorUsername == username
+                )
+                .GroupBy(t =>
+                    t.CreditorUsername == username ? t.DebtorUsername : t.CreditorUsername
+                )
+                .Select(g => new
+                {
+                    Username = g.Key,
+                    LastTransaction = g.OrderByDescending(t => t.CreatedAt).FirstOrDefault()
+                })
+                .ToList();
+
+            var result = friendsData
+                .Select(u => new UserWithLastTransaction
+                {
+                    User = new UserFriendResponse
                     {
-                        Uid = u.Uid,
+                        Email = u.Email,
                         PhotoUrl = u.PhotoUrl,
                         Username = u.Username,
                         FirstName = u.FirstName,
                         LastName = u.LastName
-                    })
+                    },
+                    LastTransaction = userTransactions
+                        .FirstOrDefault(t => t.Username == u.Username)
+                        ?.LastTransaction
+                })
                 .ToList();
-            return userFriends;
+
+            return new BaseResponse<List<UserWithLastTransaction>> { Data = result };
         }
 
-        public async Task<bool> deleteFriend(string userId, string friendUid)
+        public BaseResponse<List<string>> GetFriendsOfUser(string username)
         {
-            var friendPair = _dataContext.Friends.FirstOrDefault(f => 
-                (f.FriendOneUid == userId && f.FriendTwoUid == friendUid) || 
-                (f.FriendTwoUid == userId && f.FriendOneUid == friendUid)
+            var friends = _dataContext
+                .Friends.Where(f =>
+                    f.FriendOneUsername == username || f.FriendTwoUsername == username
+                )
+                .ToList()
+                .Select(f =>
+                {
+                    return f.FriendOneUsername == username
+                        ? f.FriendOneUsername
+                        : f.FriendTwoUsername;
+                })
+                .ToList();
+
+            return new BaseResponse<List<string>> { Data = friends };
+        }
+
+        public async Task<BaseResponse<bool>> DeleteFriend(string username, string friendUsername)
+        {
+            var friendPair = _dataContext.Friends.FirstOrDefault(f =>
+                (f.FriendOneUsername == username && f.FriendTwoUsername == friendUsername)
+                || (f.FriendTwoUsername == username && f.FriendOneUsername == friendUsername)
             );
-            //TODO: modify return to inform client if friendPair doesn't exist
             if (friendPair != null)
             {
                 _dataContext.Entry(friendPair).State = EntityState.Deleted;
                 await _dataContext.SaveChangesAsync();
-                return true;
+                return new BaseResponse<bool> { Data = true };
             }
-            return false;
 
+            return new BaseResponse<bool>
+            {
+                Error = new Error { Message = "Users are not friends" }
+            };
+        }
+
+        public async Task<BaseResponse<UserFriendResponse>> FindFriendByUsername(string username)
+        {
+            var user = await _dataContext
+                .Users.Where(user => user.Username.Contains(username))
+                .FirstOrDefaultAsync();
+            if (user != null)
+            {
+                UserFriendResponse userFriendResponse = new UserFriendResponse
+                {
+                    Email = user.Email,
+                    PhotoUrl = user.PhotoUrl,
+                    Username = user.Username,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                };
+                return new BaseResponse<UserFriendResponse> { Data = userFriendResponse };
+            }
+            return new BaseResponse<UserFriendResponse>
+            {
+                Error = new Error { Message = "User not found" }
+            };
         }
     }
 }

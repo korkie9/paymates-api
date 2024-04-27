@@ -1,8 +1,9 @@
 namespace paymatesapi.Models
 {
-    public class UserResponse
+    public class UserFriendResponse
     {
-        public required string Uid { get; set; }
+        public required string Email { get; set; }
+
         public string? PhotoUrl { get; set; }
 
         public required string Username { get; set; }
@@ -12,4 +13,3 @@ namespace paymatesapi.Models
         public required string LastName { get; set; }
     }
 }
-

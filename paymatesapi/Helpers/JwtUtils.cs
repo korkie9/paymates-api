@@ -1,64 +1,52 @@
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using paymatesapi.Entities;
 using System.Security.Cryptography;
-using paymatesapi.Models;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Linq;
+using System.Reflection.Metadata;
 
 namespace paymatesapi.Helpers
 {
     public interface IJwtUtils
     {
-        public string GenerateJwtToken(AuthenticationResponse user);
+        public string GenerateJwtToken(User user, int expiry);
+
         public string GenerateRefreshToken();
+
         public List<Claim> GetClaimsFromHeaderToken();
-        // public int? ValidateJwtToken(string? token);
 
         public string GetUidFromHeaders();
+
+        public List<Claim> GetClaimsFromToken(string token);
     }
 
-    public class JwtUtils : IJwtUtils
+    public class JwtUtils(IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : IJwtUtils
     {
-        private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        // private readonly AppSettings _appSettings;
+        private readonly IConfiguration _configuration = configuration;
 
-        public JwtUtils(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
+        public string GenerateJwtToken(User user, int expiry)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _configuration = configuration;
-        }
-
-        public string GenerateJwtToken(AuthenticationResponse user)
-        {
-            if (user == null) return "error";
-            if (user?.Uid == null) return "error";
-            if (user?.FirstName == null) return "error";
-            if (user?.LastName == null) return "error";
-            if (user?.Username == null) return "error";
-            if (user?.Email == null) return "error";
-            if (user?.Uid == null) return "error";
-
             // generate token that is valid for 5 minutes
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt:Token").Value!);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
+                Subject = new ClaimsIdentity(
+                [
                 new Claim("Uid", user.Uid),
-                new Claim("Name", user.FirstName),
-                new Claim("Surname", user.LastName),
+                new Claim("FirstName", user.FirstName),
+                new Claim("LastName", user.LastName),
                 new Claim("Username", user.Username),
                 new Claim("Email", user.Email),
                 new Claim("PhotoUrl", user.PhotoUrl ?? ""),
-            }),
-                Expires = DateTime.UtcNow.AddMinutes(5),
+                new Claim("RefreshToken", user.RefreshToken ?? ""),
+                new Claim("Password", user.Password ?? ""),
+                new Claim("RefreshTokenExpiry", user.RefreshTokenExpiry.ToString()), /// TODO: Might be an issue
+            ]),
+                Expires = DateTime.UtcNow.AddMinutes(expiry),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -74,7 +62,7 @@ namespace paymatesapi.Helpers
         }
         public List<Claim> GetClaimsFromHeaderToken()
         {
-            List<Claim> claims = new List<Claim>();
+            List<Claim> claims = [];
 
             if (_httpContextAccessor?.HttpContext?.Request?.Headers.TryGetValue("Authorization", out var authHeaderValues) == true)
             {
@@ -82,18 +70,28 @@ namespace paymatesapi.Helpers
 
                 if (!string.IsNullOrEmpty(authHeaderValue) && authHeaderValue.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
-                    string token = authHeaderValue.Substring("Bearer ".Length);
+                    string token = authHeaderValue["Bearer ".Length..];
 
                     var tokenHandler = new JwtSecurityTokenHandler();
-                    var securityToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
 
-                    if (securityToken != null)
+                    if (tokenHandler.ReadToken(token) is JwtSecurityToken securityToken)
                     {
                         claims = securityToken.Claims.ToList();
                     }
                 }
             }
 
+            return claims;
+        }
+
+        public List<Claim> GetClaimsFromToken(string token)
+        {
+            List<Claim> claims = [];
+            var tokenHandler = new JwtSecurityTokenHandler();
+            if (tokenHandler.ReadToken(token) is JwtSecurityToken securityToken)
+            {
+                claims = securityToken.Claims.ToList();
+            }
             return claims;
         }
         public string GetUidFromHeaders()

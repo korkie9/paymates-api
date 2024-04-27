@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace paymatesapi.Migrations
 {
     /// <inheritdoc />
-    public partial class Transaction_5 : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,7 +52,8 @@ namespace paymatesapi.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RefreshToken = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    RefreshTokenExpiry = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    RefreshTokenExpiry = table.Column<long>(type: "bigint", nullable: false),
+                    Verified = table.Column<bool>(type: "tinyint(1)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,29 +77,66 @@ namespace paymatesapi.Migrations
                     CreditorUid = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    FriendPairFriendId = table.Column<int>(type: "int", nullable: false)
+                    FriendId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transactions", x => x.Uid);
                     table.ForeignKey(
-                        name: "FK_Transactions_Friends_FriendPairFriendId",
-                        column: x => x.FriendPairFriendId,
+                        name: "FK_Transactions_Friends_FriendId",
+                        column: x => x.FriendId,
                         principalTable: "Friends",
                         principalColumn: "FriendId",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "BankAccounts",
+                columns: table => new
+                {
+                    BankAccountUid = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Bank = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AccountNumber = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    NameOnCard = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BranchCode = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserUid = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BankAccounts", x => x.BankAccountUid);
+                    table.ForeignKey(
+                        name: "FK_BankAccounts_Users_UserUid",
+                        column: x => x.UserUid,
+                        principalTable: "Users",
+                        principalColumn: "Uid",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
-                name: "IX_Transactions_FriendPairFriendId",
+                name: "IX_BankAccounts_UserUid",
+                table: "BankAccounts",
+                column: "UserUid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_FriendId",
                 table: "Transactions",
-                column: "FriendPairFriendId");
+                column: "FriendId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BankAccounts");
+
             migrationBuilder.DropTable(
                 name: "Transactions");
 

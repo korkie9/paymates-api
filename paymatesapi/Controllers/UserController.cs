@@ -1,39 +1,26 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using paymatesapi.Models;
 using paymatesapi.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
-using paymatesapi.Helpers;
+using paymatesapi.Entities;
 
 namespace paymatesapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController(IUserAuthService userAuthService) : ControllerBase
     {
-        private readonly IUserAuthService _userAuthService;
-
-        public UserController(IUserAuthService userAuthService)
-        {
-            _userAuthService = userAuthService;
-        }
+        private readonly IUserAuthService _userAuthService = userAuthService;
 
         [HttpPost("get-user"), Authorize]
-        public ActionResult<UserResponse> GetUser(UserRequest userRequest)
+        public ActionResult<BaseResponse<User>> GetUser(UserRequest userRequest)
         {
-            var response = _userAuthService.getUser(userRequest.Uid);
-            if (response == null || response.Uid == null)
+            var response = _userAuthService.GetUser(userRequest.Uid);
+            if (response.Error != null)
             {
-                return NotFound(new { message = "User not found" });
+                return NotFound(response);
             }
             return Ok(response);
-        }
-
-        [HttpGet("test"), Authorize]
-        public ActionResult<string> Test()
-        {
-            return Ok("hello world");
         }
     }
 }

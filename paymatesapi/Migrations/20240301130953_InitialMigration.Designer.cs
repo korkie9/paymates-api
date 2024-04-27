@@ -11,16 +11,48 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231101204616_Transaction_6")]
-    partial class Transaction_6
+    [Migration("20240301130953_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("paymatesapi.Entities.BankAccount", b =>
+                {
+                    b.Property<string>("BankAccountUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Bank")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BranchCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NameOnCard")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("BankAccountUid");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("BankAccounts");
+                });
 
             modelBuilder.Entity("paymatesapi.Entities.Friend", b =>
                 {
@@ -107,17 +139,31 @@ namespace paymatesapi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("RefreshTokenExpiry")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long>("RefreshTokenExpiry")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<bool?>("Verified")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Uid");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("paymatesapi.Entities.BankAccount", b =>
+                {
+                    b.HasOne("paymatesapi.Entities.User", "User")
+                        .WithMany("BankAccounts")
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("paymatesapi.Entities.Transaction", b =>
@@ -134,6 +180,11 @@ namespace paymatesapi.Migrations
             modelBuilder.Entity("paymatesapi.Entities.Friend", b =>
                 {
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("paymatesapi.Entities.User", b =>
+                {
+                    b.Navigation("BankAccounts");
                 });
 #pragma warning restore 612, 618
         }

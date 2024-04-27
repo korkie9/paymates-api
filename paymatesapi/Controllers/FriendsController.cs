@@ -1,62 +1,85 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using paymatesapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using paymatesapi.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
+using paymatesapi.DTOs;
+using paymatesapi.Entities;
 using paymatesapi.Helpers;
 using paymatesapi.Models;
+using paymatesapi.Services;
 
 namespace paymatesapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FriendsController : ControllerBase
+    public class FriendsController(IFriendService friendService, IJwtUtils jwtUtils)
+        : ControllerBase
     {
-        private readonly IFriendService _friendService;
-        private readonly IJwtUtils _jwtUtils;
-
-        public FriendsController(IFriendService friendService, IJwtUtils jwtUtils)
-        {
-            _jwtUtils = jwtUtils;
-            _friendService = friendService;
-        }
+        private readonly IFriendService _friendService = friendService;
+        private readonly IJwtUtils _jwtUtils = jwtUtils;
 
         [HttpPost("add-friend"), Authorize]
-        public async Task<ActionResult<string>> AddFriend(FriendDTO request)
+        public async Task<ActionResult<BaseResponse<Friend>>> AddFriend(
+            InviteFriendRequest inviteRequest
+        )
         {
-            var userId = _jwtUtils.GetUidFromHeaders();
-            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
-
-            string user = await _friendService.addFriend(userId, request.FriendUid);
-            if (user == "Users are already friends") return BadRequest(new { message = user });
-            if (user == "User not found") return BadRequest(new { message = user });
-            return Ok(user); //TODO: return okay responses with object containing message for uniformity across project
+            var user = await _friendService.AddFriend(
+                inviteRequest.Username,
+                inviteRequest.FriendUsername
+            );
+            return user?.Error?.Message != null ? BadRequest(user) : Ok(user);
         }
 
         [HttpDelete("remove-friend"), Authorize]
-        public async Task<IActionResult> RemoveFriend(FriendDTO creds)
+        public async Task<ActionResult<BaseResponse<string>>> RemoveFriend(FriendDTO creds)
         {
-            var userId = _jwtUtils.GetUidFromHeaders();
-            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
+            string userId = _jwtUtils.GetUidFromHeaders();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(
+                    new BaseResponse<string>
+                    {
+                        Error = new Error { Message = "User is not authenticated" }
+                    }
+                );
+            }
 
-            var userIsDeleted = await _friendService.deleteFriend(userId, creds.FriendUid);
-            if (userIsDeleted) return Ok("Friend was removed");
-            return BadRequest("An error occured. Friend could not be deleted.");
+            var userIsDeleted = await _friendService.DeleteFriend(userId, creds.FriendUid);
+            return userIsDeleted.Data
+                ? Ok(userIsDeleted)
+                : BadRequest(
+                    new BaseResponse<bool>
+                    {
+                        Error = new Error
+                        {
+                            Message = "An error occured. Friend could not be deleted."
+                        }
+                    }
+                );
         }
 
-        [HttpGet("get-friends"), Authorize]
-        public ActionResult<List<UserResponse>> GetUserFriends()
+        [HttpPost("get-friends-with-transactions"), Authorize]
+        public ActionResult<
+            BaseResponse<List<UserWithLastTransaction>>
+        > GetUserFriendsWithTransactions(GetFriendsRequest req)
         {
-            var userId = _jwtUtils.GetUidFromHeaders();
-            if (String.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is not authenticated" });
-
-            var friends = _friendService.GetFriendsOfUser(userId);
-            if (friends == null) return BadRequest("An error occured. Friend could not be found.");
+            var friends = _friendService.GetFriendsWithTransactionsOfUser(req.Username);
             return Ok(friends);
         }
 
+        [HttpPost("get-friends"), Authorize]
+        public ActionResult<BaseResponse<List<string>>> GetUserFriends(GetFriendsRequest req)
+        {
+            var friends = _friendService.GetFriendsOfUser(req.Username);
+            return Ok(friends);
+        }
+
+        [HttpPost("find-friend"), Authorize]
+        public async Task<ActionResult<BaseResponse<UserFriendResponse>>> FindFriend(
+            FindFriendRequest friendUsername
+        )
+        {
+            var user = await _friendService.FindFriendByUsername(friendUsername.FriendUsername);
+
+            return user?.Error?.Message != null ? BadRequest(user) : Ok(user);
+        }
     }
 }

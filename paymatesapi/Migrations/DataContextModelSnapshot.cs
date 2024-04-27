@@ -16,8 +16,40 @@ namespace paymatesapi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("paymatesapi.Entities.BankAccount", b =>
+                {
+                    b.Property<string>("BankAccountUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Bank")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("BranchCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NameOnCard")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("BankAccountUid");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("BankAccounts");
+                });
 
             modelBuilder.Entity("paymatesapi.Entities.Friend", b =>
                 {
@@ -25,11 +57,11 @@ namespace paymatesapi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("FriendOneUid")
+                    b.Property<string>("FriendOneUsername")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("FriendTwoUid")
+                    b.Property<string>("FriendTwoUsername")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -46,14 +78,14 @@ namespace paymatesapi.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("CreditorUid")
+                    b.Property<string>("CreditorUsername")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("DebtorUid")
+                    b.Property<string>("DebtorUsername")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -101,20 +133,33 @@ namespace paymatesapi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("RefreshToken")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("RefreshTokenExpiry")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long?>("RefreshTokenExpiry")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<bool?>("Verified")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Uid");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("paymatesapi.Entities.BankAccount", b =>
+                {
+                    b.HasOne("paymatesapi.Entities.User", "User")
+                        .WithMany("BankAccounts")
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("paymatesapi.Entities.Transaction", b =>
@@ -131,6 +176,11 @@ namespace paymatesapi.Migrations
             modelBuilder.Entity("paymatesapi.Entities.Friend", b =>
                 {
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("paymatesapi.Entities.User", b =>
+                {
+                    b.Navigation("BankAccounts");
                 });
 #pragma warning restore 612, 618
         }

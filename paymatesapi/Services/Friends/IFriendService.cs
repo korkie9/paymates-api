@@ -1,14 +1,20 @@
-using paymatesapi.DTOs;
+using paymatesapi.Entities;
 using paymatesapi.Models;
 
 namespace paymatesapi.Services
 {
     public interface IFriendService
     {
-        Task<string> addFriend(string userUid, string friendUid);
-        Task<bool> deleteFriend(string userId, string friendUid);
+        Task<BaseResponse<Friend>> AddFriend(string username, string friendUsername);
 
-        List<UserResponse> GetFriendsOfUser(string userId);
+        Task<BaseResponse<bool>> DeleteFriend(string username, string friendUsername);
 
+        BaseResponse<List<UserWithLastTransaction>> GetFriendsWithTransactionsOfUser(
+            string username
+        );
+
+        BaseResponse<List<string>> GetFriendsOfUser(string username);
+
+        Task<BaseResponse<UserFriendResponse>> FindFriendByUsername(string username);
     }
 }

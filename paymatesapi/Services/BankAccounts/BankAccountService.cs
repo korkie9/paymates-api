@@ -1,14 +1,13 @@
-using paymatesapi.Contexts;
-using paymatesapi.Entities;
-using paymatesapi.DTOs;
-using paymatesapi.Models;
 using Microsoft.EntityFrameworkCore;
+using paymatesapi.Contexts;
+using paymatesapi.DTOs;
+using paymatesapi.Entities;
+using paymatesapi.Models;
 
 namespace paymatesapi.Services
 {
     public class BankAccountService(DataContext dataContext) : IBankAccountService
     {
-
         private readonly DataContext _dataContext = dataContext;
 
         public async Task<BaseResponse<BankAccount>> AddBankAccount(BankAccountDto bankAccount)
@@ -22,15 +21,13 @@ namespace paymatesapi.Services
                     Bank = bankAccount.Bank,
                     AccountNumber = bankAccount.AccountNumber,
                     NameOnCard = bankAccount.NameOnCard,
-                    BranchCode = bankAccount.BranchCode
+                    BranchCode = bankAccount.BranchCode,
+                    CardType = bankAccount.CardType
                 };
                 _dataContext.BankAccounts.Add(bankAccountResponse);
                 await _dataContext.SaveChangesAsync();
 
-                var res = new BaseResponse<BankAccount>
-                {
-                    Data = bankAccountResponse
-                };
+                var res = new BaseResponse<BankAccount> { Data = bankAccountResponse };
                 return res;
             }
         }
@@ -53,20 +50,24 @@ namespace paymatesapi.Services
 
         public async Task<BaseResponse<List<BankAccount>>> GetBankAccounts(string userId)
         {
-            List<BankAccount> bankAccounts = await _dataContext.BankAccounts.Where(b => b.UserUid == userId).ToListAsync();
-            return new BaseResponse<List<BankAccount>>
-            {
-                Data = bankAccounts
-            };
+            List<BankAccount> bankAccounts = await _dataContext
+                .BankAccounts.Where(b => b.UserUid == userId)
+                .ToListAsync();
+            return new BaseResponse<List<BankAccount>> { Data = bankAccounts };
         }
 
         public async Task<BaseResponse<BankAccount>> UpdateBankAccount(BankAccountDto bankAccount)
         {
-            if (bankAccount.BankAccountUid == null) return new BaseResponse<BankAccount>
+            if (bankAccount.BankAccountUid == null)
             {
-                Error = new Error { Message = "Bank Account is invalid" }
-            };
-            var oldBankAccount = _dataContext.BankAccounts.FirstOrDefault(e => e.BankAccountUid == bankAccount.BankAccountUid);
+                return new BaseResponse<BankAccount>
+                {
+                    Error = new Error { Message = "Bank Account is invalid" }
+                };
+            }
+            var oldBankAccount = _dataContext.BankAccounts.FirstOrDefault(e =>
+                e.BankAccountUid == bankAccount.BankAccountUid
+            );
             if (oldBankAccount != null)
             {
                 _dataContext.Entry(oldBankAccount).CurrentValues.SetValues(bankAccount);
@@ -80,16 +81,15 @@ namespace paymatesapi.Services
                         Bank = bankAccount.Bank,
                         AccountNumber = bankAccount.AccountNumber,
                         NameOnCard = bankAccount.NameOnCard,
-                        BranchCode = bankAccount.BranchCode
+                        BranchCode = bankAccount.BranchCode,
+                        CardType = bankAccount.CardType
                     }
                 };
-
             }
             return new BaseResponse<BankAccount>
             {
                 Error = new Error { Message = "There was an issue updating this bank account" }
             };
         }
-
     }
 }

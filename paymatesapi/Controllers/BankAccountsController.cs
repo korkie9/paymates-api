@@ -38,7 +38,7 @@ namespace paymatesapi.Controllers
             return Ok(bankAccountDeleted);
         }
 
-        [HttpGet("get-bank-accounts"), Authorize]
+        [HttpPost("get-bank-accounts"), Authorize]
         public async Task<ActionResult<BaseResponse<List<BankAccount>>>> GetBankAccounts(
             BankAccountsRequest requestData
         )

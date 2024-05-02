@@ -34,10 +34,12 @@ namespace paymatesapi.Services
 
         public async Task<BaseResponse<bool>> DeleteBankAccount(string bankAccountId)
         {
-            var bankAccount = _dataContext.Users.Find(bankAccountId);
-            if (bankAccount != null)
+            var dbBankAccount = _dataContext
+                .BankAccounts.Where(acc => acc.BankAccountUid == bankAccountId)
+                .FirstOrDefault();
+            if (dbBankAccount != null)
             {
-                _dataContext.Users.Remove(bankAccount);
+                _dataContext.BankAccounts.Remove(dbBankAccount);
                 await _dataContext.SaveChangesAsync();
                 return new BaseResponse<bool> { Data = true };
             }

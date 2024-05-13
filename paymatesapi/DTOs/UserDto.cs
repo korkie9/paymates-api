@@ -6,8 +6,10 @@ namespace paymatesapi.DTOs
     {
 
         public string? Uid { get; set; }
+
         [EmailAddress(ErrorMessage = "Valid Email is required")]
         public required string Email { get; set; }
+
         public string? PhotoUrl { get; set; }
 
         [StringLength(100)]

@@ -1,6 +1,6 @@
 ﻿using paymatesapi.DTOs;
-using paymatesapi.Models;
 using paymatesapi.Entities;
+using paymatesapi.Models;
 
 namespace paymatesapi.Services
 {
@@ -16,9 +16,8 @@ namespace paymatesapi.Services
 
         Task<BaseResponse<bool>> DeleteUser(string id);
 
-        Task<BaseResponse<bool>> UpdateUser(UserDTO user);
+        Task<BaseResponse<bool>> UpdateUser(UserUpdateRequest user);
 
         Task<BaseResponse<string>> UpdateRefreshToken(RefreshTokenRequest requestBody);
-
     }
 }

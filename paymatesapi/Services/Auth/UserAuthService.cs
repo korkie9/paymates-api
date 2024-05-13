@@ -113,11 +113,23 @@ namespace paymatesapi.Services
             return new BaseResponse<bool> { Data = false };
         }
 
-        public async Task<BaseResponse<bool>> UpdateUser(UserDTO user)
+        public async Task<BaseResponse<bool>> UpdateUser(UserUpdateRequest user)
         {
-            var dbUser = _dataContext.Update(user);
-            await _dataContext.SaveChangesAsync();
-            return new BaseResponse<bool> { Data = true };
+            var dbUser = _dataContext.Users.Find(user.Uid);
+            if (dbUser != null)
+            {
+                User tempUser = dbUser;
+                tempUser.FirstName = user.FirstName;
+                tempUser.LastName = user.LastName;
+                tempUser.PhotoUrl = user.PhotoUrl;
+                var updatedUser = _dataContext.Update(tempUser);
+                if (updatedUser != null)
+                {
+                    await _dataContext.SaveChangesAsync();
+                    return new BaseResponse<bool> { Data = true };
+                }
+            }
+            return new BaseResponse<bool> { Error = new Error { Message = "User not found" } };
         }
 
         private static BaseResponse<string> ErrorMessage(string ErrorMessage)

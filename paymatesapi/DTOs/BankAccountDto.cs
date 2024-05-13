@@ -1,10 +1,9 @@
 namespace paymatesapi.DTOs
 {
-
     public class BankAccountDto
     {
         public string? BankAccountUid { get; set; }
-        
+
         public required string Bank { get; set; }
 
         public required string AccountNumber { get; set; }
@@ -15,5 +14,7 @@ namespace paymatesapi.DTOs
 
         public required string UserUid { get; set; }
 
+        public required string CardType { get; set; }
     }
 }
+

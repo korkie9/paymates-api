@@ -11,19 +11,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy(name: PaymatesAlloweOrigins,
-      policy =>
-      {
-        policy
-          .AllowAnyOrigin()
-          .AllowAnyHeader()
-          .AllowAnyMethod();
-      });
+    options.AddPolicy(name: PaymatesAlloweOrigins,
+        policy =>
+        {
+            policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        });
 });
 
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnectionString");
-
-
+Console.WriteLine(builder.Configuration["Urls:AzureFrontend"]);
 builder.Services.AddDbContext<DataContext>(
     options =>
         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
@@ -50,22 +49,23 @@ builder
     .Services.AddAuthentication()
     .AddJwtBearer(options =>
         {
-          options.TokenValidationParameters = new TokenValidationParameters
-          {
-            ValidateIssuerSigningKey = true,
-            ValidateAudience = false,
-            ValidateIssuer = false,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                  Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Token").Value!)
-              )
-          };
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Token").Value!)
+                )
+            };
         });
 
 var app = builder.Build();
+
 if (app.Environment.IsDevelopment())
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

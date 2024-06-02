@@ -30,7 +30,7 @@ namespace paymatesapi.Controllers
       return response.Error != null ? BadRequest(response) : Ok(response);
     }
 
-    [HttpPost("upload-photo")]
+    [HttpPost("upload-photo"), Authorize]
     public async Task<ActionResult<BaseResponse<string>>> UploadBlob(IFormFile file)
     {
       string userId = _jwtUtils.GetUidFromHeaders();
@@ -40,6 +40,15 @@ namespace paymatesapi.Controllers
         return BadRequest(uploadResponse);
       }
       return Ok(uploadResponse);
+    }
+
+    [HttpGet("get-photo/{photoId}")]
+    public async Task<IActionResult> GetPhoto(string photoId)
+    {
+      System.Console.WriteLine("photoid: ", photoId);
+      var imageStream = await userService.GetImageAsync(photoId);
+      if (imageStream == null) return BadRequest();
+      return File(imageStream, "application/octet-stream", photoId);
     }
   }
 }

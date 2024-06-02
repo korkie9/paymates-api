@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
 });
 
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnectionString");
-Console.WriteLine(builder.Configuration["Urls:AzureFrontend"]);
+Console.WriteLine("logging azure containter: ", builder.Configuration["Urls:AzureContainer"]);
 builder.Services.AddDbContext<DataContext>(
     options =>
         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))

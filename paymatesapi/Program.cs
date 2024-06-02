@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
 });
 
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnectionString");
-
+Console.WriteLine("logging azure containter: ", builder.Configuration["Urls:AzureContainer"]);
 builder.Services.AddDbContext<DataContext>(
     options =>
         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
@@ -42,6 +42,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IBankAccountService, BankAccountService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 builder

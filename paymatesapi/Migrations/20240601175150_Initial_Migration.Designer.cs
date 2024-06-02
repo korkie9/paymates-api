@@ -11,8 +11,8 @@ using paymatesapi.Contexts;
 namespace paymatesapi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240318224100_Fix_Transation")]
-    partial class Fix_Transation
+    [Migration("20240601175150_Initial_Migration")]
+    partial class Initial_Migration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,10 @@ namespace paymatesapi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("BranchCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CardType")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -81,8 +85,8 @@ namespace paymatesapi.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CreditorUsername")
                         .IsRequired()
@@ -136,10 +140,9 @@ namespace paymatesapi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("RefreshToken")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<long>("RefreshTokenExpiry")
+                    b.Property<long?>("RefreshTokenExpiry")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Username")
